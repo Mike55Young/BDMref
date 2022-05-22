@@ -1,8 +1,11 @@
 # BDMref
 Reformat the output of Australian Births Deaths and Marriages websites as references for Genealogy websites like WikiTree.
+At present it supports NSW and Victoria. It is designed to be expanded to cover other states.
+For South Australia it will need to use the Genealogy SA webite data, if possible.
 
 To be able to run this you need to have Python 3 installed. It was developed on Python version 3.8
 
+You can either run the program from IDLE or by double-clicking on BDMref.pyw (as long as .pyw is associated with Python - install of Python should do that).
 When you run BDMref.pyw it should open a small window showing buttons to select a state and an input area.
 
 When one of the state buttons is clicked further buttons are added below the input box.
