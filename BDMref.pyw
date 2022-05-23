@@ -1,5 +1,5 @@
 # NSW BDM Reference Generator for Wikitree
-# Version: 1.1
+# Version: 1.2
 # Author: Mike Young
 #
 import tkinter as tk
