@@ -53,10 +53,12 @@ qld_ref = " Queensland Government family history research service (https://www.f
 # handle state buttons
 def nsw_panel():
     vic_frame.grid_remove()
+    qld_frame.grid_remove()
     nsw_frame.grid(row=4, column=0)
 
 def vic_panel():
     nsw_frame.grid_remove()
+    qld_frame.grid_remove()
     vic_frame.grid(row=4, column=0)
 
 def qld_panel():
@@ -181,7 +183,8 @@ msgbox.grid(row=0, column=0)
 button_frame = tk.Frame(root)
 button_frame.grid(row=1, column=0)
 tk.Button(button_frame, text="NSW", command=nsw_panel, width=8).grid(row=0, column=0, padx=5)
-tk.Button(button_frame, text="Vic", command=vic_panel, width=8).grid(row=0, column=1, padx=5)
+tk.Button(button_frame, text="Qld", command=qld_panel, width=8).grid(row=0, column=1, padx=5)
+tk.Button(button_frame, text="Vic", command=vic_panel, width=8).grid(row=0, column=2, padx=5)
 # other states will go here
 
 # Box for pasted text
