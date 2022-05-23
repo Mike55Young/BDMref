@@ -1,4 +1,5 @@
 # NSW BDM Reference Generator for Wikitree
+# Version: 1.1
 # Author: Mike Young
 #
 import tkinter as tk
@@ -6,18 +7,14 @@ import tkinter as tk
 #from itertools import permutations
 import string
 
-# window size
-# HEIGHT = 500
-# WIDTH = 600
-
 outtext = ""
 
 # Constants
 nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search) "
 vic_ref = "Births Deaths and Marriages Victoria - Family History Search (https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history) "
+qld_ref = " Queensland Government family history research service (https://www.familyhistory.bdm.qld.gov.au/) "
 #month_list = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 #day_list = range(1, 32)
-#ref_type_text = ""
 
 # NSW Sample (Birth/Death) - name, reg no, father, mother, registry:
 # DUNK BENJAMIN T
@@ -37,6 +34,22 @@ vic_ref = "Births Deaths and Marriages Victoria - Family History Search (https:/
 # 1878
 # 1104/1878
 
+# Qld sample
+#    Selina Dunk
+#    Event date: 29/10/1887
+#    Event type: Marriage registration
+#    Registration details: 1887/C/1706
+#    Products available:
+#    Spouse: Richard Mann
+#
+#    Joseph Dunk
+#    Event date: 04/03/1885
+#    Event type: Death registration
+#    Registration details: 1885/C/4284
+#    Products available:
+#    Mother: Ann Griffiths
+#    Father/parent: Henry Dunk
+
 # handle state buttons
 def nsw_panel():
     vic_frame.grid_remove()
@@ -46,6 +59,11 @@ def vic_panel():
     nsw_frame.grid_remove()
     vic_frame.grid(row=4, column=0)
 
+def qld_panel():
+    nsw_frame.grid_remove()
+    vic_frame.grid_remove()
+    qld_frame.grid(row=4, column=0)
+    
 # Generate reference
 def output_reference(out):
     output_text.set(out)
@@ -53,6 +71,7 @@ def output_reference(out):
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
     input_text.set("")
+    input_box.focus_set()
 
 def gen_nsw_birth():
     text = input_text.get() + "\n\n\n\n"
@@ -121,6 +140,27 @@ def gen_vic():
             out += ", Age: " + field_list[9]
     output_reference(out)
 
+def gen_qld():
+    text = input_text.get() + "\n\n\n\n\n\n"
+    field_list = text.split('\n')
+    type_list = field_list[2].split(':')
+    print(field_list)
+    print(type_list)
+    reg_type = type_list[1].strip().split(' ')[0]
+    out = qld_ref + reg_type + " registration #"
+    if reg_type == "Birth" or reg_type == "Death":
+        out += field_list[3].split(':')[1] + ", " + field_list[0].strip()
+        out += ", " + field_list[5].strip()
+        out += ", " + field_list[6].strip()
+        out += ", " + field_list[1].strip()
+    elif reg_type == "Marriage":
+        out += field_list[3].split(':')[1] + ", " + field_list[0].strip()
+        out += ", " + field_list[5].strip()
+        out += ", " + field_list[1].strip()
+    else:
+        out += "** unknown type =" + reg_type + "."
+    output_reference(out)
+
 
 # Setup the window
 
@@ -132,9 +172,6 @@ output_text = tk.StringVar()
 msg_text = tk.StringVar()
 msg_text.set("Click on a state")
 input_text = tk.StringVar()
-
-#canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
-#canvas.pack()
 
 # Message area
 msgbox = tk.Label(root, textvariable=msg_text)
@@ -151,6 +188,7 @@ tk.Button(button_frame, text="Vic", command=vic_panel, width=8).grid(row=0, colu
 tk.Label(root, text="Paste row from BDM website here").grid(row=2, column=0)
 input_box = tk.Entry(root, textvariable=input_text, width=70)
 input_box.grid(row=3, column=0, pady=3)
+input_box.focus_set()
 
 # NSW frame
 nsw_frame = tk.Frame(root)
@@ -161,6 +199,10 @@ tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(r
 # Vic frame
 vic_frame = tk.Frame(root)
 tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=0, column=0, padx=5, pady=3)
+
+# Qld frame
+qld_frame = tk.Frame(root)
+tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=0, column=0, padx=5, pady=3)
 
 # output area (optional - mostly for debug)
 output_box = tk.Label(root, textvariable=output_text, width=70, height=5, wrap=490, justify="left", anchor="nw", relief="sunken")

@@ -1,6 +1,6 @@
 # BDMref
 Reformat the output of Australian Births Deaths and Marriages websites as references for Genealogy websites like WikiTree.
-At present it supports NSW and Victoria. It is designed to be expanded to cover other states.
+At present it supports NSW, Queensland and Victoria. It is designed to be expanded to cover other states.
 For South Australia it will need to use the Genealogy SA webite data, if possible.
 
 To be able to run this you need to have Python 3 installed. It was developed on Python version 3.8
