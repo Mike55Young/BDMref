@@ -118,28 +118,33 @@ def gen_nsw_marriage():
 def gen_vic():
     text = input_text.get() + "\n\n\n\n\n\n"
     field_list = text.split('\n')
-    name1_list = field_list[4].split(',')
-    print(field_list)
-    reg_type = field_list[3]
+    # allow for browser differences
+    if field_list[0] == '':
+        o = 1
+    else:
+        o = 0
+    name1_list = field_list[3 + o].split(',')
+    # print(field_list)
+    reg_type = field_list[2 + o]
     out = vic_ref + reg_type + " registration # "
     if reg_type == "Birth":
-        name2_list = field_list[6].split(',')
-        out += field_list[9] + ", " + field_list[2] + " " + field_list[1]
-        out += ", Mother: " + name1_list[1] + " " + field_list[5]
+        name2_list = field_list[5 + o].split(',')
+        out += field_list[8 + o] + ", " + field_list[1 + o] + " " + field_list[o]
+        out += ", Mother: " + name1_list[1] + " " + field_list[4 + o]
         out += ", Father: " + name2_list[1]
-        out += ", Location: " + field_list[7]
+        out += ", Location: " + field_list[6 + o]
     elif reg_type == "Marriage":
-        out += field_list[7] + ", Groom: " + field_list[2] + " " + field_list[1]
+        out += field_list[6 + o] + ", Groom: " + field_list[1 + o] + " " + field_list[o]
         out += ", Bride: " + name1_list[1] + " " + name1_list[0]
     elif reg_type == "Death":
-        name2_list = field_list[6].split(',')
-        out += field_list[11] + ", " + field_list[2] + " " + field_list[1]
-        out += ", Mother: " + name1_list[1] + " " + field_list[5]
+        name2_list = field_list[5 + o].split(',')
+        out += field_list[10 + o] + ", " + field_list[1 + o] + " " + field_list[o]
+        out += ", Mother: " + name1_list[1] + " " + field_list[4 + o]
         out += ", Father: " + name2_list[1]
         if field_list[7] != "":
-            out += ", Location: " + field_list[7]
+            out += ", Location: " + field_list[6 + o]
         if field_list[9] != "":
-            out += ", Age: " + field_list[9]
+            out += ", Age: " + field_list[8 + o]
     output_reference(out)
 
 def gen_qld():
