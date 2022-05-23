@@ -78,6 +78,8 @@ def output_reference(out):
 def gen_nsw_birth():
     text = input_text.get() + "\n\n\n\n"
     field_list = text.split('\n')
+    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
+    # will need to do our best or use a browser extension
     name = field_list[0].strip()
     name_list = name.split(" ", 1)
     # print(field_list)
@@ -91,6 +93,8 @@ def gen_nsw_birth():
 def gen_nsw_death():
     text = input_text.get() + "\n\n\n\n"
     field_list = text.split('\n')
+    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
+    # will need to do our best or use a browser extension
     name = field_list[0].strip()
     name_list = name.split(" ", 1)
     # print(field_list)
@@ -104,6 +108,8 @@ def gen_nsw_death():
 def gen_nsw_marriage():
     text = input_text.get() + "\n\n\n\n"
     field_list = text.split('\n')
+    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
+    # will need to do our best or use a browser extension
     name = field_list[0].strip()
     name_list = name.split(" ", 1)
     # print(field_list)
@@ -154,15 +160,23 @@ def gen_qld():
     print(field_list)
     print(type_list)
     reg_type = type_list[1].strip().split(' ')[0]
+    # Chrome doesn't see the column separation and combines the Registration number with the Products available field
+    # The following code checks for this and adjusts the numbering of subsequent cells
+    reg_num = field_list[3].split(':')[1]
+    if reg_num[-18:] == "Products available":
+        reg_num = reg_num[0:-18]
+        o = -1
+    else:
+        o = 0
     out = qld_ref + reg_type + " registration #"
     if reg_type == "Birth" or reg_type == "Death":
-        out += field_list[3].split(':')[1] + ", " + field_list[0].strip()
-        out += ", " + field_list[5].strip()
-        out += ", " + field_list[6].strip()
+        out += reg_num + ", " + field_list[0].strip()
+        out += ", " + field_list[5 + o].strip()
+        out += ", " + field_list[6 + o].strip()
         out += ", " + field_list[1].strip()
     elif reg_type == "Marriage":
-        out += field_list[3].split(':')[1] + ", " + field_list[0].strip()
-        out += ", " + field_list[5].strip()
+        out += reg_num + ", " + field_list[0].strip()
+        out += ", " + field_list[5 + o].strip()
         out += ", " + field_list[1].strip()
     else:
         out += "** unknown type =" + reg_type + "."
