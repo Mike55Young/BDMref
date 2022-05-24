@@ -269,9 +269,9 @@ vic_button.grid(row=0, column=2, padx=5)
 # NSW frame
 nsw_frame = tk.Frame(root)
 tk.Label(nsw_frame, text="Copy a row on the browser, then click on the button below that corresponds to the entry type").grid(row=0, column=0, columnspan=3)
-tk.Button(nsw_frame, text="Birth", command=gen_nsw_html_birth, width=15).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(nsw_frame, text="Death", command=gen_nsw_html_death, width=15).grid(row=1, column=1, padx=5, pady=3)
-tk.Button(nsw_frame, text="Marriage", command=gen_nsw_html_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
+tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=1, column=1, padx=5, pady=3)
+tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
 
 # Vic frame
 vic_frame = tk.Frame(root)
