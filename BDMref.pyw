@@ -1,11 +1,11 @@
 # NSW BDM Reference Generator for Wikitree
-# Version: 1.3
-# Author: Mike Young
+__author__ = "Mike Young"
+__Version__ = "1.4"
+
 #
 import tkinter as tk
-#import os
-#from itertools import permutations
 import string
+import win32clipboard
 
 outtext = ""
 
@@ -13,124 +13,184 @@ outtext = ""
 nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search) "
 vic_ref = "Births Deaths and Marriages Victoria - Family History Search (https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history) "
 qld_ref = " Queensland Government family history research service (https://www.familyhistory.bdm.qld.gov.au/) "
-#month_list = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-#day_list = range(1, 32)
 
-# NSW Sample (Birth/Death) - name, reg no, father, mother, registry:
-# DUNK BENJAMIN T
-# 3063/1859 
-# WILLIAM
-# ELIZA
-# CHIPPENDALE
+# get the clipboard contents as text
+def get_text():
+    try:
+        win32clipboard.OpenClipboard(0)
+        src = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
+    finally:
+        win32clipboard.CloseClipboard()
+    return(src)
 
-# Vic Sample - surname, given names, rec type, mother, mother birth name, father, place, year, reg no:
-# STANLAKE
-# Eveline Amelia
-# Birth
-# <Unknown Family Name>, Amelia Tredwen
-# PARDY
-# <Unknown Family Name>, Charles
-# CA RL
-# 1878
-# 1104/1878
+# get the clipboard contents as html
+def get_html():
+    try:
+        win32clipboard.OpenClipboard(0)
+        html_format = win32clipboard.RegisterClipboardFormat("HTML Format")
+        src = win32clipboard.GetClipboardData(html_format)
+        # print(src)
+    finally:
+        win32clipboard.CloseClipboard()
+    return(src)
 
-# Qld sample
-#    Selina Dunk
-#    Event date: 29/10/1887
-#    Event type: Marriage registration
-#    Registration details: 1887/C/1706
-#    Products available:
-#    Spouse: Richard Mann
-#
-#    Joseph Dunk
-#    Event date: 04/03/1885
-#    Event type: Death registration
-#    Registration details: 1885/C/4284
-#    Products available:
-#    Mother: Ann Griffiths
-#    Father/parent: Henry Dunk
-
-# handle state buttons
+# handle state selection buttons
 def nsw_panel():
     vic_frame.grid_remove()
+    vic_button.config(relief = tk.RAISED)
     qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
     nsw_frame.grid(row=4, column=0)
+    nsw_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
 
 def vic_panel():
     nsw_frame.grid_remove()
+    nsw_button.config(relief = tk.RAISED)
     qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
     vic_frame.grid(row=4, column=0)
+    vic_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
 
 def qld_panel():
     nsw_frame.grid_remove()
+    nsw_button.config(relief = tk.RAISED)
     vic_frame.grid_remove()
+    vic_button.config(relief = tk.RAISED)
     qld_frame.grid(row=4, column=0)
+    qld_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
     
-# Generate reference
+# Copy the generated reference to the clipboard and the output box
 def output_reference(out):
     output_text.set(out)
     root.clipboard_clear()
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
-    input_text.set("")
-    input_box.focus_set()
+
+# For the NSW website the program has to read the html because a text-only copy has no column separators in Chrome.
+def get_pair(s):
+    # extract the part of the wicketpath value from the last underscore to the close quote, and the value between the span tags
+    # html has the format <span wicketpath="data_key_name">data_value</span>
+    wpath = s.split('"')[1]
+    tag_name = wpath.split('_')[-1]
+    tag_value = s.split('>')[1]
+    return tag_name, tag_value
+
+def parse_nsw_html(clip):
+    family_name = ""
+    given_name = ""
+    item_num = ""
+    item_year = ""
+    item_ref = ""
+    father = ""
+    mother = ""
+    district = ""
+    groom_family_name = ""
+    groom_given_name = ""
+    bride_family_name = ""
+    bride_given_name = ""
+    
+    # find the strings starting with <span wicketpath...> and ending in </span>
+    i = clip.find("<span wicketpath=")
+    while i != -1:
+        j = clip.find("</span>", i)
+        tag_name, tag_value = get_pair(clip[i:j])
+        # set a variable based on the returned name/value pair
+        if tag_name == "subjectFamilyName":
+            family_name = tag_value
+        elif tag_name == "subjectGivenName":
+            given_name = tag_value
+        elif tag_name == "itemNum":
+            item_num = tag_value
+        elif tag_name == "itemYear":
+            item_year = tag_value
+        elif tag_name == "indexRef":
+            item_ref = tag_value
+        elif tag_name == "fatherName":
+            father = tag_value
+        elif tag_name == "motherName":
+            mother = tag_value
+        elif tag_name == "district":
+            district = tag_value
+        elif tag_name == "groomFamilyName":
+            groom_family_name = tag_value
+        elif tag_name == "groomGivenName":
+            groom_given_name = tag_value
+        elif tag_name == "brideFamilyName":
+            bride_family_name = tag_value
+        elif tag_name == "brideGivenName":
+            bride_given_name = tag_value
+        else:
+            # just in case there is a field not previously used...
+            print(tag_name + "=" + tag_value)
+        i = clip.find("<span wicketpath=", i + 1)
+    # return a dictionary of value pairs
+    value_dict = {"name": family_name + " " + string.capwords(given_name),
+                  "ref": item_num + "/" + item_year,
+                  "refextra": item_ref,
+                  "father": string.capwords(father),
+                  "mother": string.capwords(mother),
+                  "district": string.capwords(district),
+                  "groom": string.capwords(groom_given_name + " " + groom_family_name),
+                  "bride": string.capwords(bride_given_name + " " + bride_family_name)
+                  }
+    return value_dict
 
 def gen_nsw_birth():
-    text = input_text.get() + "\n\n\n\n"
-    field_list = text.split('\n')
-    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
-    # will need to do our best or use a browser extension
-    name = field_list[0].strip()
-    name_list = name.split(" ", 1)
-    # print(field_list)
-    out = nsw_ref + "Birth registration # " + field_list[1].strip() + ", " + name_list[0] + " " + string.capwords(name_list[1])
-    out += ", Father: " + string.capwords(field_list[2]) + ", Mother: " + string.capwords(field_list[3])
+    clip = get_html()
+    if clip == None:
+        out = "Unable to read HTML clipboard"
+        return
+    value_dict = parse_nsw_html(str(clip))
+    # print(value_dict)
+    out = nsw_ref + "Birth registration # " + value_dict["ref"]
+    out += ", " + value_dict["name"]
+    out += ", Father: " + value_dict["father"] + ", Mother: " + value_dict["mother"]
     # Registry may be omitted so allow for that
-    if field_list[4] != "":
-        out += ", Registry: " + string.capwords(field_list[4])
+    if value_dict["district"] != "":
+        out += ", Registry: " + value_dict["district"]
     output_reference(out)
 
 def gen_nsw_death():
-    text = input_text.get() + "\n\n\n\n"
-    field_list = text.split('\n')
-    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
-    # will need to do our best or use a browser extension
-    name = field_list[0].strip()
-    name_list = name.split(" ", 1)
-    # print(field_list)
-    out = nsw_ref + "Death registration # " + field_list[1].strip() + ", " + name_list[0] + " " + string.capwords(name_list[1])
-    out += ", Father: " + string.capwords(field_list[2]) + ", Mother: " + string.capwords(field_list[3])
+    clip = get_html()
+    if clip == None:
+        out = "Unable to read HTML clipboard"
+        return
+    value_dict = parse_nsw_html(str(clip))
+    # print(value_dict)
+    out = nsw_ref + "Death registration # " + value_dict["ref"]
+    out += ", " + value_dict["name"]
+    out += ", Father: " + value_dict["father"] + ", Mother: " + value_dict["mother"]
     # Registry may be omitted so allow for that
-    if field_list[4] != "":
-        out += ", Registry: " + string.capwords(field_list[4])
+    if value_dict["district"] != "":
+        out += ", Registry: " + value_dict["district"]
     output_reference(out)
 
 def gen_nsw_marriage():
-    text = input_text.get() + "\n\n\n\n"
-    field_list = text.split('\n')
-    # Chrome doesn't acknowledge the columns formed by div elements on the NSW website
-    # will need to do our best or use a browser extension
-    name = field_list[0].strip()
-    name_list = name.split(" ", 1)
-    # print(field_list)
-    out = nsw_ref + "Marriage registration # " + field_list[0].strip()
-    out += ", Groom: " + string.capwords(field_list[2]) + " " + string.capwords(field_list[1])
-    out += ", Bride: " + string.capwords(field_list[4]) + " " + string.capwords(field_list[3])
+    clip = get_html()
+    if clip == None:
+        out = "Unable to read HTML clipboard"
+        return
+    value_dict = parse_nsw_html(str(clip))
+    # print(value_dict)
+    out = nsw_ref + "Marriage registration # " + value_dict["ref"]
+    out += ", Groom: " + value_dict["groom"] + ", Bride: " + value_dict["bride"]
     # Registry may be omitted so allow for that
-    if field_list[5] != "":
-        out += ", Registry: " + string.capwords(field_list[5])
+    if value_dict["district"] != "":
+        out += ", Registry: " + value_dict["district"]
     output_reference(out)
 
 def gen_vic():
-    text = input_text.get() + "\n\n\n\n\n\n"
-    field_list = text.split('\n')
+    text = get_text().decode('utf-8') + "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+    field_list = text.split('\r\n')
     # allow for browser differences
     if field_list[0] == '':
         o = 1
     else:
         o = 0
     name1_list = field_list[3 + o].split(',')
-    # print(field_list)
     reg_type = field_list[2 + o]
     out = vic_ref + reg_type + " registration # "
     if reg_type == "Birth":
@@ -154,11 +214,9 @@ def gen_vic():
     output_reference(out)
 
 def gen_qld():
-    text = input_text.get() + "\n\n\n\n\n\n"
-    field_list = text.split('\n')
+    text = get_text().decode('utf-8') + "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
+    field_list = text.split('\r\n')
     type_list = field_list[2].split(':')
-    print(field_list)
-    print(type_list)
     reg_type = type_list[1].strip().split(' ')[0]
     # Chrome doesn't see the column separation and combines the Registration number with the Products available field
     # The following code checks for this and adjusts the numbering of subsequent cells
@@ -187,12 +245,11 @@ def gen_qld():
 
 root = tk.Tk()
 
-root.title("Wikitree BDM Reference Generator")
+root.title("Wikitree BDM Reference Generator v" + __Version__)
 # common data
 output_text = tk.StringVar()
 msg_text = tk.StringVar()
 msg_text.set("Click on a state")
-input_text = tk.StringVar()
 
 # Message area
 msgbox = tk.Label(root, textvariable=msg_text)
@@ -201,30 +258,30 @@ msgbox.grid(row=0, column=0)
 # Buttons to select State
 button_frame = tk.Frame(root)
 button_frame.grid(row=1, column=0)
-tk.Button(button_frame, text="NSW", command=nsw_panel, width=8).grid(row=0, column=0, padx=5)
-tk.Button(button_frame, text="Qld", command=qld_panel, width=8).grid(row=0, column=1, padx=5)
-tk.Button(button_frame, text="Vic", command=vic_panel, width=8).grid(row=0, column=2, padx=5)
+nsw_button = tk.Button(button_frame, text="NSW", command=nsw_panel, width=8)
+nsw_button.grid(row=0, column=0, padx=5)
+qld_button = tk.Button(button_frame, text="Qld", command=qld_panel, width=8)
+qld_button.grid(row=0, column=1, padx=5)
+vic_button = tk.Button(button_frame, text="Vic", command=vic_panel, width=8)
+vic_button.grid(row=0, column=2, padx=5)
 # other states will go here
-
-# Box for pasted text
-tk.Label(root, text="Paste row from BDM website here").grid(row=2, column=0)
-input_box = tk.Entry(root, textvariable=input_text, width=70)
-input_box.grid(row=3, column=0, pady=3)
-input_box.focus_set()
 
 # NSW frame
 nsw_frame = tk.Frame(root)
-tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=0, column=0, padx=5, pady=3)
-tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=0, column=1, padx=5, pady=3)
-tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=0, column=2, padx=5, pady=3)
+tk.Label(nsw_frame, text="Copy a row on the browser, then click on the button below that corresponds to the entry type").grid(row=0, column=0, columnspan=3)
+tk.Button(nsw_frame, text="Birth", command=gen_nsw_html_birth, width=15).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(nsw_frame, text="Death", command=gen_nsw_html_death, width=15).grid(row=1, column=1, padx=5, pady=3)
+tk.Button(nsw_frame, text="Marriage", command=gen_nsw_html_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
 
 # Vic frame
 vic_frame = tk.Frame(root)
-tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=0, column=0, padx=5, pady=3)
+tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
+tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
 
 # Qld frame
 qld_frame = tk.Frame(root)
-tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=0, column=0, padx=5, pady=3)
+tk.Label(qld_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
+tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=1, column=0, padx=5, pady=3)
 
 # output area (optional - mostly for debug)
 output_box = tk.Label(root, textvariable=output_text, width=70, height=5, wrap=490, justify="left", anchor="nw", relief="sunken")
