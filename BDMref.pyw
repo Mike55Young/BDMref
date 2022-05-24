@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.4"
+__Version__ = "1.5"
 
 #
 import tkinter as tk
