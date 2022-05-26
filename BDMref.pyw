@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.5"
+__Version__ = "1.6"
 
 #
 import tkinter as tk
@@ -13,6 +13,10 @@ outtext = ""
 nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search) "
 vic_ref = "Births Deaths and Marriages Victoria - Family History Search (https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history) "
 qld_ref = " Queensland Government family history research service (https://www.familyhistory.bdm.qld.gov.au/) "
+
+START_TAG = 1
+END_TAG = 2
+DATA = 3
 
 # get the clipboard contents as text
 def get_text():
@@ -34,7 +38,45 @@ def get_html():
         win32clipboard.CloseClipboard()
     return(src)
 
-# handle state selection buttons
+# Function to parse html fragment and store the elements in a list for further analysis
+def html_parse(s):
+    # List to store the parsed html - each element is itself a list: element_type, tag, element_text
+    # element_type can be "start tag", "data" or "end tag"
+    # tag is the tag name e.g. "div", "span", "br"
+    # element_text is the full text of the element or data (including the <> bits)
+    html_list = []
+    
+    element = ""
+    element_type = DATA
+    for c in s:
+        if c == "<":
+            if element_type == DATA:
+                if element != "":
+                    html_list.append([element_type, "", element])
+                    element = ""
+                element_type = START_TAG
+            element += c
+        elif c == "/":
+            if element == "<":
+                element_type = END_TAG
+            element += c
+        elif c == ">":
+            if element_type == DATA:
+                element += c
+            else:
+                if element_type == START_TAG:
+                    tag = element[1:].strip().split(" ")[0]
+                else:
+                    tag = element[2:].strip().split(" ")[0]
+                element += c
+                html_list.append([element_type, tag, element])
+                element = ""
+                element_type = DATA
+        else:
+            element += c
+    return html_list
+
+# handle state selection buttons being pressed
 def nsw_panel():
     vic_frame.grid_remove()
     vic_button.config(relief = tk.RAISED)
@@ -69,7 +111,8 @@ def output_reference(out):
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
 
-# For the NSW website the program has to read the html because a text-only copy has no column separators in Chrome.
+# Browsers are inconsisten in their handling of text clips from website pseudo tables
+# the most reliable way to get the fields into the correct variables is to read the HTML clipboard
 def get_pair(s):
     # extract the part of the wicketpath value from the last underscore to the close quote, and the value between the span tags
     # html has the format <span wicketpath="data_key_name">data_value</span>
@@ -127,9 +170,12 @@ def parse_nsw_html(clip):
             print(tag_name + "=" + tag_value)
         i = clip.find("<span wicketpath=", i + 1)
     # return a dictionary of value pairs
+    if item_ref != "":
+        ref = item_num + "/" + item_year + " " + item_ref
+    else:
+        ref = item_num + "/" + item_year
     value_dict = {"name": family_name + " " + string.capwords(given_name),
-                  "ref": item_num + "/" + item_year,
-                  "refextra": item_ref,
+                  "ref": ref,
                   "father": string.capwords(father),
                   "mother": string.capwords(mother),
                   "district": string.capwords(district),
