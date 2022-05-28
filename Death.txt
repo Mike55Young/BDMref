@@ -1,0 +1,3 @@
+{|title|}{ (|url|)} Death registration #{ |ref|}{, |family name,U|}{ |given name,C|}{, Date: |date|}
+{, Father: |father,C|}{, Mother:{ |mother,C|}{ |mother family,C|}}{, Registry: |district,C|}
+{, Age: |age|}{, Birth location: |location|}{, Death location: |location death|}{, Spouse at death: |death spouse|}

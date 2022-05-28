@@ -1,0 +1,4 @@
+{|title|}{ (|url|)} Marriage registration #{ |ref|}{, Date: |date|}
+{, |family name,U|}{ |given name,C|}{, Spouse:{ |spouse given,C|}{ |spouse family,C|}}
+{, Groom:{ |groom given,C|}{ |groom family,C|}}{, Bride:{ |bride given,C|}{ |bride family,C|}}
+{, Registry: |district,C|}

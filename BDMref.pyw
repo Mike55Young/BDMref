@@ -10,14 +10,19 @@ import win32clipboard
 outtext = ""
 
 # Constants
-nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search) "
-vic_ref = "Births Deaths and Marriages Victoria - Family History Search (https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history) "
-qld_ref = " Queensland Government family history research service (https://www.familyhistory.bdm.qld.gov.au/) "
+nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search"
+nsw_url = "https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search"
+vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
+vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
+qld_ref = "Queensland Government family history research service"
+qld_url = "https://www.familyhistory.bdm.qld.gov.au/"
 
+# Element type constants for the HTML parser
 START_TAG = 1
 END_TAG = 2
 DATA = 3
 
+# Functions to read the clipboard
 # get the clipboard contents as text
 def get_text():
     try:
@@ -38,45 +43,7 @@ def get_html():
         win32clipboard.CloseClipboard()
     return(src)
 
-# Function to parse html fragment and store the elements in a list for further analysis
-def html_parse(s):
-    # List to store the parsed html - each element is itself a list: element_type, tag, element_text
-    # element_type can be "start tag", "data" or "end tag"
-    # tag is the tag name e.g. "div", "span", "br"
-    # element_text is the full text of the element or data (including the <> bits)
-    html_list = []
-    
-    element = ""
-    element_type = DATA
-    for c in s:
-        if c == "<":
-            if element_type == DATA:
-                if element != "":
-                    html_list.append([element_type, "", element])
-                    element = ""
-                element_type = START_TAG
-            element += c
-        elif c == "/":
-            if element == "<":
-                element_type = END_TAG
-            element += c
-        elif c == ">":
-            if element_type == DATA:
-                element += c
-            else:
-                if element_type == START_TAG:
-                    tag = element[1:].strip().split(" ")[0]
-                else:
-                    tag = element[2:].strip().split(" ")[0]
-                element += c
-                html_list.append([element_type, tag, element])
-                element = ""
-                element_type = DATA
-        else:
-            element += c
-    return html_list
-
-# handle state selection buttons being pressed
+# Handle state selection buttons being pressed
 def nsw_panel():
     vic_frame.grid_remove()
     vic_button.config(relief = tk.RAISED)
@@ -103,7 +70,8 @@ def qld_panel():
     qld_frame.grid(row=4, column=0)
     qld_button.config(relief = tk.SUNKEN)
     msg_text.set("")
-    
+
+# Output functions --------------------------
 # Copy the generated reference to the clipboard and the output box
 def output_reference(out):
     output_text.set(out)
@@ -111,8 +79,75 @@ def output_reference(out):
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
 
+def output_birth(state_ref, state_url, value_dict):
+    out = state_ref + " (" + state_url + ") Birth registration # " + value_dict["reg no"]
+    out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
+    out += ", Father: " + string.capwords(value_dict["father"]) + ", Mother: " + string.capwords(value_dict["mother"])
+    # Registry may be omitted so allow for that
+    if value_dict["date"] != "":
+        out += ", Date: " + value_dict["date"]
+    if value_dict["district"] != "":
+        out += ", Registry: " + string.capwords(value_dict["district"])
+    output_reference(out)
+
+def output_death(state_ref, state_url, value_dict):
+    out = state_ref + " (" + state_url + ") Death registration # " + value_dict["reg no"]
+    out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
+    out += ", Father: " + string.capwords(value_dict["father"]) + ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["date"] != "":
+        out += ", Date: " + value_dict["date"]
+    if value_dict["age"] != "":
+        out += ", Age: " + value_dict["age"]
+    if value_dict["location"] != "":
+        out += ", Location: " + string.capwords(value_dict["location"])
+    if value_dict["location death"] != "":
+        out += ", Death Location: " + string.capwords(value_dict["location death"])
+    if value_dict["district"] != "":
+        out += ", Registry: " + string.capwords(value_dict["district"])
+    output_reference(out)
+
+def output_marriage(state_ref, state_url, value_dict):
+    out = state_ref + " (" + state_url + ") Marriage registration # " + value_dict["reg no"]
+    if value_dict["groom given"] != "":
+        out += ", Groom: " + string.capwords(value_dict["groom given"]) + " " + string.capwords(value_dict["groom family"])
+        out += ", Bride: " + string.capwords(value_dict["bride given"]) + " " + string.capwords(value_dict["bride family"])
+    elif value_dict["family name"] != "":
+        out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
+        out += ", Spouse: " + string.capwords(value_dict["spouse given"]) + " " + string.capwords(value_dict["spouse family"])
+    if value_dict["date"] != "":
+        out += ", Date: " + value_dict["date"]
+    if value_dict["district"] != "":
+        out += ", Registry: " + string.capwords(value_dict["district"])
+    output_reference(out)
+
+# initialise a dictionary to transfer data from the parsing functions to the output functions
+def init_value_dict():
+    value_dict = {"family name": "",
+                  "given name": "",
+                  "event": "",
+                  "reg no": "",
+                  "father": "",
+                  "mother": "",
+                  "mother family": "",
+                  "district": "",
+                  "groom given": "",
+                  "groom family": "",
+                  "bride given": "",
+                  "bride family": "",
+                  "spouse given": "",
+                  "spouse family": "",
+                  "location": "",
+                  "location death": "",
+                  "date": "",
+                  "age": "",
+                  "death spouse": ""
+                  }
+    return value_dict
+
 # Browsers are inconsisten in their handling of text clips from website pseudo tables
 # the most reliable way to get the fields into the correct variables is to read the HTML clipboard
+
+# NSW parsing functions
 def get_pair(s):
     # extract the part of the wicketpath value from the last underscore to the close quote, and the value between the span tags
     # html has the format <span wicketpath="data_key_name">data_value</span>
@@ -122,18 +157,10 @@ def get_pair(s):
     return tag_name, tag_value
 
 def parse_nsw_html(clip):
-    family_name = ""
-    given_name = ""
     item_num = ""
     item_year = ""
     item_ref = ""
-    father = ""
-    mother = ""
-    district = ""
-    groom_family_name = ""
-    groom_given_name = ""
-    bride_family_name = ""
-    bride_given_name = ""
+    value_dict = init_value_dict()
     
     # find the strings starting with <span wicketpath...> and ending in </span>
     i = clip.find("<span wicketpath=")
@@ -142,9 +169,9 @@ def parse_nsw_html(clip):
         tag_name, tag_value = get_pair(clip[i:j])
         # set a variable based on the returned name/value pair
         if tag_name == "subjectFamilyName":
-            family_name = tag_value
+            value_dict["family name"] = tag_value
         elif tag_name == "subjectGivenName":
-            given_name = tag_value
+            value_dict["given name"] = tag_value
         elif tag_name == "itemNum":
             item_num = tag_value
         elif tag_name == "itemYear":
@@ -152,112 +179,110 @@ def parse_nsw_html(clip):
         elif tag_name == "indexRef":
             item_ref = tag_value
         elif tag_name == "fatherName":
-            father = tag_value
+            value_dict["father"] = tag_value
         elif tag_name == "motherName":
-            mother = tag_value
+            value_dict["mother"] = tag_value
         elif tag_name == "district":
-            district = tag_value
+            value_dict["district"] = tag_value
         elif tag_name == "groomFamilyName":
-            groom_family_name = tag_value
+            value_dict["groom family"] = tag_value
         elif tag_name == "groomGivenName":
-            groom_given_name = tag_value
+            value_dict["groom given"] = tag_value
         elif tag_name == "brideFamilyName":
-            bride_family_name = tag_value
+            value_dict["bride family"] = tag_value
         elif tag_name == "brideGivenName":
-            bride_given_name = tag_value
+            value_dict["bride given"] = tag_value
         else:
             # just in case there is a field not previously used...
             print(tag_name + "=" + tag_value)
-        i = clip.find("<span wicketpath=", i + 1)
-    # return a dictionary of value pairs
+        i = clip.find("<span wicketpath=", j)
     if item_ref != "":
-        ref = item_num + "/" + item_year + " " + item_ref
+        value_dict["reg no"] = item_num + "/" + item_year + " " + item_ref
     else:
-        ref = item_num + "/" + item_year
-    value_dict = {"name": family_name + " " + string.capwords(given_name),
-                  "ref": ref,
-                  "father": string.capwords(father),
-                  "mother": string.capwords(mother),
-                  "district": string.capwords(district),
-                  "groom": string.capwords(groom_given_name + " " + groom_family_name),
-                  "bride": string.capwords(bride_given_name + " " + bride_family_name)
-                  }
+        value_dict["reg no"] = item_num + "/" + item_year
+    # return a dictionary of value pairs
     return value_dict
 
+def parse_vic_html(clip):
+    value_dict = init_value_dict()
+    field_list = []
+    # Find strings bounded by <span> </span> and create a list corresponding to the columns on the page
+    i = clip.find("<span>")
+    while i != -1:
+        j = clip.find("</span>", i)
+        field_list.append(clip[i+6:j].strip())
+        i = clip.find("<span>", j)
+    if len(field_list) < 12:
+        msg_text.set("Not enough columns copied - expecting 12, got " + str(len(field_list)))
+        
+    # Now store the columns into the respective dictionary items
+    value_dict["family name"] = field_list[0]
+    value_dict["given name"] = field_list[1]
+    value_dict["event"] = field_list[2]
+    # field 3 needs to be split and stored depending on the event type
+    name_family, name_given = field_list[3].split(',')
+    if value_dict["event"] == "Marriage":
+        value_dict["spouse given"] = name_given.strip()
+        value_dict["spouse family"] = name_family.strip()
+    else:
+        value_dict["mother"] = name_given
+    value_dict["mother family"] = field_list[4]
+    # field 5 needs to be split if it is non-blank
+    if field_list[5] != "":
+        name_family, name_given = field_list[5].split(',')
+        value_dict["father"] = name_given.strip()
+    value_dict["location"] = field_list[6]
+    value_dict["location death"] = field_list[7]
+    if field_list[8] != "<Unknown Family Name>":
+        value_dict["death spouse"] = field_list[8]
+    value_dict["age"] = field_list[9]
+    value_dict["date"] = field_list[10]
+    value_dict["reg no"] = field_list[11]
+    return value_dict
+
+# handlers for the generate buttons
 def gen_nsw_birth():
     clip = get_html()
     if clip == None:
-        out = "Unable to read HTML clipboard"
+        msg_text.set("Unable to read HTML clipboard")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    out = nsw_ref + "Birth registration # " + value_dict["ref"]
-    out += ", " + value_dict["name"]
-    out += ", Father: " + value_dict["father"] + ", Mother: " + value_dict["mother"]
-    # Registry may be omitted so allow for that
-    if value_dict["district"] != "":
-        out += ", Registry: " + value_dict["district"]
-    output_reference(out)
+    output_birth(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_death():
     clip = get_html()
     if clip == None:
-        out = "Unable to read HTML clipboard"
+        msg_text.set("Unable to read HTML clipboard")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    out = nsw_ref + "Death registration # " + value_dict["ref"]
-    out += ", " + value_dict["name"]
-    out += ", Father: " + value_dict["father"] + ", Mother: " + value_dict["mother"]
-    # Registry may be omitted so allow for that
-    if value_dict["district"] != "":
-        out += ", Registry: " + value_dict["district"]
-    output_reference(out)
+    output_death(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_marriage():
     clip = get_html()
     if clip == None:
-        out = "Unable to read HTML clipboard"
+        msg_text.set("Unable to read HTML clipboard")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    out = nsw_ref + "Marriage registration # " + value_dict["ref"]
-    out += ", Groom: " + value_dict["groom"] + ", Bride: " + value_dict["bride"]
-    # Registry may be omitted so allow for that
-    if value_dict["district"] != "":
-        out += ", Registry: " + value_dict["district"]
-    output_reference(out)
+    output_marriage(nsw_ref, nsw_url, value_dict)
 
 def gen_vic():
-    text = get_text().decode('utf-8') + "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
-    field_list = text.split('\r\n')
-    # allow for browser differences
-    if field_list[0] == '':
-        o = 1
+    clip = get_html()
+    if clip == None:
+        msg_text.set("Unable to read HTML clipboard")
+        return
+    value_dict = parse_vic_html(clip.decode('utf-8'))
+    if value_dict["event"] == "Birth":
+        output_birth(vic_ref, vic_url, value_dict)
+    elif value_dict["event"] == "Death":
+        output_death(vic_ref, vic_url, value_dict)
+    elif value_dict["event"] == "Marriage":
+        output_marriage(vic_ref, vic_url, value_dict)
     else:
-        o = 0
-    name1_list = field_list[3 + o].split(',')
-    reg_type = field_list[2 + o]
-    out = vic_ref + reg_type + " registration # "
-    if reg_type == "Birth":
-        name2_list = field_list[5 + o].split(',')
-        out += field_list[8 + o] + ", " + field_list[1 + o] + " " + field_list[o]
-        out += ", Mother: " + name1_list[1] + " " + field_list[4 + o]
-        out += ", Father: " + name2_list[1]
-        out += ", Location: " + field_list[6 + o]
-    elif reg_type == "Marriage":
-        out += field_list[6 + o] + ", Groom: " + field_list[1 + o] + " " + field_list[o]
-        out += ", Bride: " + name1_list[1] + " " + name1_list[0]
-    elif reg_type == "Death":
-        name2_list = field_list[5 + o].split(',')
-        out += field_list[10 + o] + ", " + field_list[1 + o] + " " + field_list[o]
-        out += ", Mother: " + name1_list[1] + " " + field_list[4 + o]
-        out += ", Father: " + name2_list[1]
-        if field_list[7] != "":
-            out += ", Location: " + field_list[6 + o]
-        if field_list[9] != "":
-            out += ", Age: " + field_list[8 + o]
-    output_reference(out)
+        msg_text.set("Unexpected event type: " + value_dict["event"])
+    return
 
 def gen_qld():
     text = get_text().decode('utf-8') + "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
@@ -272,7 +297,7 @@ def gen_qld():
         o = -1
     else:
         o = 0
-    out = qld_ref + reg_type + " registration #"
+    out = qld_ref + " (" + qld_url + ") " + reg_type + " registration #"
     if reg_type == "Birth" or reg_type == "Death":
         out += reg_num + ", " + field_list[0].strip()
         out += ", " + field_list[5 + o].strip()
