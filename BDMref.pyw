@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.6"
+__Version__ = "1.7"
 
 #
 import tkinter as tk
@@ -81,27 +81,48 @@ def output_reference(out):
 
 def output_birth(state_ref, state_url, value_dict):
     out = state_ref + " (" + state_url + ") Birth registration # " + value_dict["reg no"]
-    out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
-    out += ", Father: " + string.capwords(value_dict["father"]) + ", Mother: " + string.capwords(value_dict["mother"])
-    # Registry may be omitted so allow for that
+    if value_dict["name"] != "":
+        out += ", " + value_dict["name"]
+    else:
+        out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
+    if value_dict["father"] != "":
+        out += ", Father: " + string.capwords(value_dict["father"]) 
+    out += ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["parent"] != "":
+        out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
+    if value_dict["mother family"] != "":
+        out += " " + value_dict["mother family"]
     if value_dict["date"] != "":
         out += ", Date: " + value_dict["date"]
+    if value_dict["location birth"] != "":
+        out += ", Birth Location: " + value_dict["location birth"]
     if value_dict["district"] != "":
         out += ", Registry: " + string.capwords(value_dict["district"])
     output_reference(out)
 
 def output_death(state_ref, state_url, value_dict):
     out = state_ref + " (" + state_url + ") Death registration # " + value_dict["reg no"]
-    out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
-    out += ", Father: " + string.capwords(value_dict["father"]) + ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["name"] != "":
+        out += ", " + value_dict["name"]
+    else:
+        out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
+    if value_dict["father"] != "":
+        out += ", Father: " + string.capwords(value_dict["father"]) 
+    out += ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["parent"] != "":
+        out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
+    if value_dict["mother family"] != "":
+        out += " " + value_dict["mother family"]
     if value_dict["date"] != "":
         out += ", Date: " + value_dict["date"]
     if value_dict["age"] != "":
         out += ", Age: " + value_dict["age"]
-    if value_dict["location"] != "":
-        out += ", Location: " + string.capwords(value_dict["location"])
+    if value_dict["dob"] != "":
+        out += ", Date of Birth: " + value_dict["dob"]
+    if value_dict["location birth"] != "":
+        out += ", Birth Location: " + value_dict["location birth"]
     if value_dict["location death"] != "":
-        out += ", Death Location: " + string.capwords(value_dict["location death"])
+        out += ", Death Location: " + value_dict["location death"]
     if value_dict["district"] != "":
         out += ", Registry: " + string.capwords(value_dict["district"])
     output_reference(out)
@@ -111,9 +132,13 @@ def output_marriage(state_ref, state_url, value_dict):
     if value_dict["groom given"] != "":
         out += ", Groom: " + string.capwords(value_dict["groom given"]) + " " + string.capwords(value_dict["groom family"])
         out += ", Bride: " + string.capwords(value_dict["bride given"]) + " " + string.capwords(value_dict["bride family"])
+    elif value_dict["name"] != "":
+        out += ", " + value_dict["name"]
     elif value_dict["family name"] != "":
         out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
         out += ", Spouse: " + string.capwords(value_dict["spouse given"]) + " " + string.capwords(value_dict["spouse family"])
+    if value_dict["spouse"] != "":
+        out += ", Spouse: " + string.capwords(value_dict["spouse"])
     if value_dict["date"] != "":
         out += ", Date: " + value_dict["date"]
     if value_dict["district"] != "":
@@ -124,10 +149,12 @@ def output_marriage(state_ref, state_url, value_dict):
 def init_value_dict():
     value_dict = {"family name": "",
                   "given name": "",
+                  "name": "",
                   "event": "",
                   "reg no": "",
                   "father": "",
                   "mother": "",
+                  "parent": "",
                   "mother family": "",
                   "district": "",
                   "groom given": "",
@@ -136,9 +163,11 @@ def init_value_dict():
                   "bride family": "",
                   "spouse given": "",
                   "spouse family": "",
-                  "location": "",
+                  "spouse": "",
+                  "location birth": "",
                   "location death": "",
                   "date": "",
+                  "dob": "",
                   "age": "",
                   "death spouse": ""
                   }
@@ -231,7 +260,7 @@ def parse_vic_html(clip):
     if field_list[5] != "":
         name_family, name_given = field_list[5].split(',')
         value_dict["father"] = name_given.strip()
-    value_dict["location"] = field_list[6]
+    value_dict["location birth"] = field_list[6]
     value_dict["location death"] = field_list[7]
     if field_list[8] != "<Unknown Family Name>":
         value_dict["death spouse"] = field_list[8]
@@ -240,6 +269,42 @@ def parse_vic_html(clip):
     value_dict["reg no"] = field_list[11]
     return value_dict
 
+def parse_qld_html(clip):
+    value_dict = init_value_dict()
+    i = clip.find('<a class="recordlink"')
+    i = clip.find('href=', i + 20)
+    q = clip[i + 5]
+    j = clip.find(q, i + 6)
+    value_dict.update({"url": clip[i + 6:j]})
+    i = clip.find(">", j)
+    j = clip.find("<", i)
+    value_dict["name"] = clip[i + 1:j].strip()
+    i = clip.find("<br>", j)
+    while i != -1:
+        i += 4
+        j = clip.find("<", i)
+        field_type, field_value = clip[i:j].strip().split(":")
+        if field_type == "Event date":
+            value_dict["date"] = field_value.strip()
+        elif field_type == "Event type":
+            value_dict["event"] = field_value.strip().split(" ")[0]
+        elif field_type == "Registration details":
+            value_dict["reg no"] = field_value.strip()
+        elif field_type == "Registration details":
+            value_dict["reg no"] = field_value.strip()
+        elif field_type == "Mother":
+            value_dict["mother"] = field_value.strip()
+        elif field_type == "Father/parent":
+            value_dict["parent"] = field_value.strip()
+        elif field_type == "Date of birth":
+            value_dict["dob"] = field_value.strip()
+        elif field_type == "Spouse":
+            value_dict["spouse"] = field_value.strip()
+        else:
+            msg_text.set("Unknown type: " + field_type)
+        i = clip.find("<br>", j)
+    return value_dict
+ 
 # handlers for the generate buttons
 def gen_nsw_birth():
     clip = get_html()
@@ -285,31 +350,21 @@ def gen_vic():
     return
 
 def gen_qld():
-    text = get_text().decode('utf-8') + "\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n"
-    field_list = text.split('\r\n')
-    type_list = field_list[2].split(':')
-    reg_type = type_list[1].strip().split(' ')[0]
-    # Chrome doesn't see the column separation and combines the Registration number with the Products available field
-    # The following code checks for this and adjusts the numbering of subsequent cells
-    reg_num = field_list[3].split(':')[1]
-    if reg_num[-18:] == "Products available":
-        reg_num = reg_num[0:-18]
-        o = -1
+    clip = get_html()
+    if clip == None:
+        msg_text.set("Unable to read HTML clipboard")
+        return
+    value_dict = parse_qld_html(clip.decode('utf-8'))
+    qld_url = value_dict["url"]
+    if value_dict["event"] == "Birth":
+        output_birth(qld_ref, qld_url, value_dict)
+    elif value_dict["event"] == "Death":
+        output_death(qld_ref, qld_url, value_dict)
+    elif value_dict["event"] == "Marriage":
+        output_marriage(qld_ref, qld_url, value_dict)
     else:
-        o = 0
-    out = qld_ref + " (" + qld_url + ") " + reg_type + " registration #"
-    if reg_type == "Birth" or reg_type == "Death":
-        out += reg_num + ", " + field_list[0].strip()
-        out += ", " + field_list[5 + o].strip()
-        out += ", " + field_list[6 + o].strip()
-        out += ", " + field_list[1].strip()
-    elif reg_type == "Marriage":
-        out += reg_num + ", " + field_list[0].strip()
-        out += ", " + field_list[5 + o].strip()
-        out += ", " + field_list[1].strip()
-    else:
-        out += "** unknown type =" + reg_type + "."
-    output_reference(out)
+        msg_text.set("Unexpected event type: " + value_dict["event"])
+    return
 
 
 # Setup the window
