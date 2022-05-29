@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.8"
+__Version__ = "1.8.1"
 
 #
 import tkinter as tk
@@ -365,7 +365,8 @@ def parse_wa_html(clip):
             value_dict["location birth"] = field_value
             value_dict["event"] = "Birth"
         elif field_type == "deathPlace":
-            value_dict["location death"] = field_value
+            # this is actually the birth location as shown on the website column heading (verified with a known overseas birth)
+            value_dict["location birth"] = field_value
             value_dict["event"] = "Death"
         elif field_type == "marriagePlace":
             value_dict["location"] = field_value
