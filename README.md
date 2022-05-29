@@ -31,6 +31,9 @@ For NSW you need to tell the program what type of record you are viewing, so the
 
 ## Version History
 
+### Version 1.8
+* Add support for Western Australia
+
 ### Version 1.7
 * Fixed missing field in Victorian output
 * Converted Queensland to use HTML data, including url pointing to detail record (website says you can bookmark it)

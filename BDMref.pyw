@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.7"
+__Version__ = "1.8"
 
 #
 import tkinter as tk
@@ -12,10 +12,14 @@ outtext = ""
 # Constants
 nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search"
 nsw_url = "https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search"
-vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
-vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
 qld_ref = "Queensland Government family history research service"
 qld_url = "https://www.familyhistory.bdm.qld.gov.au/"
+sa_ref = "Queensland Government family history research service"
+sa_url = "https://www.familyhistory.bdm.qld.gov.au/"
+vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
+vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
+wa_ref = "Western Australia Department of Justice - Online Index Search"
+wa_url = "https://www.wa.gov.au/organisation/department-of-justice/online-index-search-tool"
 
 # Element type constants for the HTML parser
 START_TAG = 1
@@ -49,17 +53,10 @@ def nsw_panel():
     vic_button.config(relief = tk.RAISED)
     qld_frame.grid_remove()
     qld_button.config(relief = tk.RAISED)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
     nsw_frame.grid(row=4, column=0)
     nsw_button.config(relief = tk.SUNKEN)
-    msg_text.set("")
-
-def vic_panel():
-    nsw_frame.grid_remove()
-    nsw_button.config(relief = tk.RAISED)
-    qld_frame.grid_remove()
-    qld_button.config(relief = tk.RAISED)
-    vic_frame.grid(row=4, column=0)
-    vic_button.config(relief = tk.SUNKEN)
     msg_text.set("")
 
 def qld_panel():
@@ -67,8 +64,32 @@ def qld_panel():
     nsw_button.config(relief = tk.RAISED)
     vic_frame.grid_remove()
     vic_button.config(relief = tk.RAISED)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
     qld_frame.grid(row=4, column=0)
     qld_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
+
+def vic_panel():
+    nsw_frame.grid_remove()
+    nsw_button.config(relief = tk.RAISED)
+    qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
+    vic_frame.grid(row=4, column=0)
+    vic_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
+
+def wa_panel():
+    nsw_frame.grid_remove()
+    nsw_button.config(relief = tk.RAISED)
+    qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
+    vic_frame.grid_remove()
+    vic_button.config(relief = tk.RAISED)
+    wa_frame.grid(row=4, column=0)
+    wa_button.config(relief = tk.SUNKEN)
     msg_text.set("")
 
 # Output functions --------------------------
@@ -85,6 +106,8 @@ def output_birth(state_ref, state_url, value_dict):
         out += ", " + value_dict["name"]
     else:
         out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
+    if value_dict["gender"] != "":
+        out += ", Gender: " + value_dict["gender"] 
     if value_dict["father"] != "":
         out += ", Father: " + string.capwords(value_dict["father"]) 
     out += ", Mother: " + string.capwords(value_dict["mother"])
@@ -106,6 +129,8 @@ def output_death(state_ref, state_url, value_dict):
         out += ", " + value_dict["name"]
     else:
         out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
+    if value_dict["gender"] != "":
+        out += ", Gender: " + value_dict["gender"] 
     if value_dict["father"] != "":
         out += ", Father: " + string.capwords(value_dict["father"]) 
     out += ", Mother: " + string.capwords(value_dict["mother"])
@@ -136,11 +161,17 @@ def output_marriage(state_ref, state_url, value_dict):
         out += ", " + value_dict["name"]
     elif value_dict["family name"] != "":
         out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
+        if value_dict["gender"] != "":
+            out += ", Gender: " + value_dict["gender"]
         out += ", Spouse: " + string.capwords(value_dict["spouse given"]) + " " + string.capwords(value_dict["spouse family"])
     if value_dict["spouse"] != "":
         out += ", Spouse: " + string.capwords(value_dict["spouse"])
+    if value_dict["spouse gender"] != "":
+        out += ", Spouse gender: " + string.capwords(value_dict["spouse gender"])
     if value_dict["date"] != "":
         out += ", Date: " + value_dict["date"]
+    if value_dict["location"] != "":
+        out += ", Marriage Location: " + value_dict["location"]
     if value_dict["district"] != "":
         out += ", Registry: " + string.capwords(value_dict["district"])
     output_reference(out)
@@ -150,6 +181,7 @@ def init_value_dict():
     value_dict = {"family name": "",
                   "given name": "",
                   "name": "",
+                  "gender": "",
                   "event": "",
                   "reg no": "",
                   "father": "",
@@ -164,6 +196,7 @@ def init_value_dict():
                   "spouse given": "",
                   "spouse family": "",
                   "spouse": "",
+                  "spouse gender": "",
                   "location birth": "",
                   "location death": "",
                   "date": "",
@@ -305,6 +338,60 @@ def parse_qld_html(clip):
         i = clip.find("<br>", j)
     return value_dict
  
+def parse_wa_html(clip):
+    value_dict = init_value_dict()
+    field_list = []
+    # Find strings bounded by <td ...> </td>
+    # The opening td contains an attribute with prefix cdk-column- that indicates the data type
+    i = clip.find("<td")
+    while i != -1:
+        i = clip.find("cdk-column-", i) + len("cdk-column-")
+        j = clip.find(" ", i)
+        field_type = clip[i:j]
+        i = clip.find(">", j)
+        j = clip.find("</td>", i)
+        field_value = clip[i + 1:j].strip()
+        if field_type == "surname":
+            value_dict["family name"] = field_value
+        elif field_type == "givenNames":
+            value_dict["given name"] = field_value
+        elif field_type == "gender" or field_type == "gender01":
+            value_dict["gender"] = field_value
+        elif field_type == "father":
+            value_dict["father"] = field_value
+        elif field_type == "mother":
+            value_dict["mother"] = field_value
+        elif field_type == "birthPlace":
+            value_dict["location birth"] = field_value
+            value_dict["event"] = "Birth"
+        elif field_type == "deathPlace":
+            value_dict["location death"] = field_value
+            value_dict["event"] = "Death"
+        elif field_type == "marriagePlace":
+            value_dict["location"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_type == "yearOfBirth" or field_type == "yearOfDeath" or field_type == "yearOfMarriage":
+            value_dict["date"] = field_value
+        elif field_type == "age":
+            value_dict["age"] = field_value
+        elif field_type == "spouseSurname":
+            value_dict["spouse family"] = field_value
+        elif field_type == "spouseGivenNames":
+            value_dict["spouse given"] = field_value
+        elif field_type == "gender02":
+            value_dict["spouse gender"] = field_value
+        elif field_type == "registrationDistrict":
+            value_dict["district"] = field_value
+        elif field_type == "registrationNumber":
+            reg_no = field_value
+        elif field_type == "registrationYear":
+            reg_year = field_value
+        else:
+            msg_text.set("Unknown type: " + field_type)
+        i = clip.find("<td", j)
+    value_dict["reg no"] = reg_no + "/" + reg_year
+    return value_dict
+
 # handlers for the generate buttons
 def gen_nsw_birth():
     clip = get_html()
@@ -366,6 +453,21 @@ def gen_qld():
         msg_text.set("Unexpected event type: " + value_dict["event"])
     return
 
+def gen_wa():
+    clip = get_html()
+    if clip == None:
+        msg_text.set("Unable to read HTML clipboard")
+        return
+    value_dict = parse_wa_html(clip.decode('utf-8'))
+    if value_dict["event"] == "Birth":
+        output_birth(wa_ref, wa_url, value_dict)
+    elif value_dict["event"] == "Death":
+        output_death(wa_ref, wa_url, value_dict)
+    elif value_dict["event"] == "Marriage":
+        output_marriage(wa_ref, wa_url, value_dict)
+    else:
+        msg_text.set("Unexpected event type: " + value_dict["event"])
+    return
 
 # Setup the window
 
@@ -390,6 +492,8 @@ qld_button = tk.Button(button_frame, text="Qld", command=qld_panel, width=8)
 qld_button.grid(row=0, column=1, padx=5)
 vic_button = tk.Button(button_frame, text="Vic", command=vic_panel, width=8)
 vic_button.grid(row=0, column=2, padx=5)
+wa_button = tk.Button(button_frame, text="WA", command=wa_panel, width=8)
+wa_button.grid(row=0, column=3, padx=5)
 # other states will go here
 
 # NSW frame
@@ -399,17 +503,22 @@ tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=1, 
 tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=1, column=1, padx=5, pady=3)
 tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
 
-# Vic frame
-vic_frame = tk.Frame(root)
-tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
-
 # Qld frame
 qld_frame = tk.Frame(root)
 tk.Label(qld_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=1, column=0, padx=5, pady=3)
 
-# output area (optional - mostly for debug)
+# Vic frame
+vic_frame = tk.Frame(root)
+tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
+tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
+
+# WA frame
+wa_frame = tk.Frame(root)
+tk.Label(wa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
+tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=1, column=0, padx=5, pady=3)
+
+# output area (optional - mostly for debug, but it does allow you to check the result before pasting it)
 output_box = tk.Label(root, textvariable=output_text, width=70, height=5, wrap=490, justify="left", anchor="nw", relief="sunken")
 output_box.grid(row=5, column=0, padx=2, pady=2)
 
