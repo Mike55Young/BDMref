@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.8.1"
+__Version__ = "1.9"
 
 #
 import tkinter as tk
@@ -14,8 +14,8 @@ nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search"
 nsw_url = "https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search"
 qld_ref = "Queensland Government family history research service"
 qld_url = "https://www.familyhistory.bdm.qld.gov.au/"
-sa_ref = "Queensland Government family history research service"
-sa_url = "https://www.familyhistory.bdm.qld.gov.au/"
+sa_ref = "Genealogy South Australia - Online Database Search"
+sa_url = "https://www.genealogysa.org.au/resources/online-database-search"
 vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
 vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
 wa_ref = "Western Australia Department of Justice - Online Index Search"
@@ -42,32 +42,48 @@ def get_html():
         win32clipboard.OpenClipboard(0)
         html_format = win32clipboard.RegisterClipboardFormat("HTML Format")
         src = win32clipboard.GetClipboardData(html_format)
-        # print(src)
     finally:
         win32clipboard.CloseClipboard()
     return(src)
 
 # Handle state selection buttons being pressed
 def nsw_panel():
-    vic_frame.grid_remove()
-    vic_button.config(relief = tk.RAISED)
-    qld_frame.grid_remove()
-    qld_button.config(relief = tk.RAISED)
-    wa_frame.grid_remove()
-    wa_button.config(relief = tk.RAISED)
     nsw_frame.grid(row=4, column=0)
     nsw_button.config(relief = tk.SUNKEN)
+    qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
+    sa_frame.grid_remove()
+    sa_button.config(relief = tk.RAISED)
+    vic_frame.grid_remove()
+    vic_button.config(relief = tk.RAISED)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
     msg_text.set("")
 
 def qld_panel():
     nsw_frame.grid_remove()
     nsw_button.config(relief = tk.RAISED)
+    qld_frame.grid(row=4, column=0)
+    qld_button.config(relief = tk.SUNKEN)
+    sa_frame.grid_remove()
+    sa_button.config(relief = tk.RAISED)
     vic_frame.grid_remove()
     vic_button.config(relief = tk.RAISED)
     wa_frame.grid_remove()
     wa_button.config(relief = tk.RAISED)
-    qld_frame.grid(row=4, column=0)
-    qld_button.config(relief = tk.SUNKEN)
+    msg_text.set("")
+
+def sa_panel():
+    nsw_frame.grid_remove()
+    nsw_button.config(relief = tk.RAISED)
+    qld_frame.grid_remove()
+    qld_button.config(relief = tk.RAISED)
+    sa_frame.grid(row=4, column=0)
+    sa_button.config(relief = tk.SUNKEN)
+    vic_frame.grid_remove()
+    vic_button.config(relief = tk.RAISED)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
     msg_text.set("")
 
 def vic_panel():
@@ -75,10 +91,12 @@ def vic_panel():
     nsw_button.config(relief = tk.RAISED)
     qld_frame.grid_remove()
     qld_button.config(relief = tk.RAISED)
-    wa_frame.grid_remove()
-    wa_button.config(relief = tk.RAISED)
+    sa_frame.grid_remove()
+    sa_button.config(relief = tk.RAISED)
     vic_frame.grid(row=4, column=0)
     vic_button.config(relief = tk.SUNKEN)
+    wa_frame.grid_remove()
+    wa_button.config(relief = tk.RAISED)
     msg_text.set("")
 
 def wa_panel():
@@ -86,6 +104,8 @@ def wa_panel():
     nsw_button.config(relief = tk.RAISED)
     qld_frame.grid_remove()
     qld_button.config(relief = tk.RAISED)
+    sa_frame.grid_remove()
+    sa_button.config(relief = tk.RAISED)
     vic_frame.grid_remove()
     vic_button.config(relief = tk.RAISED)
     wa_frame.grid(row=4, column=0)
@@ -110,7 +130,8 @@ def output_birth(state_ref, state_url, value_dict):
         out += ", Gender: " + value_dict["gender"] 
     if value_dict["father"] != "":
         out += ", Father: " + string.capwords(value_dict["father"]) 
-    out += ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["mother"] != "":
+        out += ", Mother: " + string.capwords(value_dict["mother"])
     if value_dict["parent"] != "":
         out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
     if value_dict["mother family"] != "":
@@ -133,7 +154,8 @@ def output_death(state_ref, state_url, value_dict):
         out += ", Gender: " + value_dict["gender"] 
     if value_dict["father"] != "":
         out += ", Father: " + string.capwords(value_dict["father"]) 
-    out += ", Mother: " + string.capwords(value_dict["mother"])
+    if value_dict["mother"] != "":
+        out += ", Mother: " + string.capwords(value_dict["mother"])
     if value_dict["parent"] != "":
         out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
     if value_dict["mother family"] != "":
@@ -197,6 +219,7 @@ def init_value_dict():
                   "spouse family": "",
                   "spouse": "",
                   "spouse gender": "",
+                  "location": "",
                   "location birth": "",
                   "location death": "",
                   "date": "",
@@ -323,8 +346,6 @@ def parse_qld_html(clip):
             value_dict["event"] = field_value.strip().split(" ")[0]
         elif field_type == "Registration details":
             value_dict["reg no"] = field_value.strip()
-        elif field_type == "Registration details":
-            value_dict["reg no"] = field_value.strip()
         elif field_type == "Mother":
             value_dict["mother"] = field_value.strip()
         elif field_type == "Father/parent":
@@ -338,6 +359,60 @@ def parse_qld_html(clip):
         i = clip.find("<br>", j)
     return value_dict
  
+def parse_sa_html(clip):
+    value_dict = init_value_dict()
+    field_list = []
+    # Find strings bounded by <td class=""> </td> and create a list corresponding to the columns on the page
+    i = clip.find('<td class="">')
+    while i != -1:
+        i += len('<td class="">')
+        j = clip.find("</td>", i)
+        field_list.append(clip[i:j].strip())
+        i = clip.find('<td class="">', j)
+    if len(field_list) < 6:
+        msg_text.set("Should be at least 6 columns but found " + str(len(field_list)))
+        return value_dict
+    # Now work out what record type we have.
+    # If View Details is the last field copied we can find the type in there.
+    if field_list[-1][0:1] == '<a':
+        i = field_list[-1].find("coid=") + 5
+        j = field_list[-1].find("&", i)
+        value_dict["event"] = string.capwords(field_list[-1][i:j])
+        field_list = field_list[:-2]
+    elif len(field_list) == 6:
+        value_dict["event"] = "Death"
+    elif len(field_list) == 7:
+        if field_list[2] == 'M' or field_list[2] == 'F':
+            value_dict["event"] = "Birth"
+        else:
+            value_dict["event"] = "Marriage"
+    else:
+        msg_text.set("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+        
+    # Now store the columns into the respective dictionary items
+    if value_dict["event"] == "Marriage":
+        if field_list[0].find("(members only)") > 0:
+            value_dict["groom family"] = '(members only)'
+        else:    
+            value_dict["groom family"] = field_list[0]
+        value_dict["groom given"] = field_list[1]
+        if field_list[2].find("(members only)") > 0:
+            value_dict["bride family"] = '(members only)'
+        else:    
+            value_dict["bride family"] = field_list[2]
+        value_dict["bride given"] = field_list[3]
+    else:
+        value_dict["family name"] = field_list[0]
+        value_dict["given name"] = field_list[1]
+        value_dict["gender"] = field_list[2]
+        if value_dict["event"] == "Birth":
+            value_dict["father"] = field_list[3]
+    # Last 3 are always district, book/page and year
+    value_dict["district"] = field_list[-3]
+    value_dict["reg no"] = field_list[-2]
+    value_dict["date"] = field_list[-1]
+    return value_dict
+
 def parse_wa_html(clip):
     value_dict = init_value_dict()
     field_list = []
@@ -398,6 +473,7 @@ def gen_nsw_birth():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
@@ -407,6 +483,7 @@ def gen_nsw_death():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
@@ -416,6 +493,7 @@ def gen_nsw_marriage():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
@@ -425,6 +503,7 @@ def gen_vic():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_vic_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -435,12 +514,14 @@ def gen_vic():
         output_marriage(vic_ref, vic_url, value_dict)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
+        output_text.set("")
     return
 
 def gen_qld():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_qld_html(clip.decode('utf-8'))
     qld_url = value_dict["url"]
@@ -452,12 +533,34 @@ def gen_qld():
         output_marriage(qld_ref, qld_url, value_dict)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
+        output_text.set("")
+    return
+
+def gen_sa():
+    clip = get_html()
+    if clip == None:
+        msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
+        return
+    value_dict = parse_sa_html(clip.decode('utf-8'))
+    if value_dict["event"] == "Birth":
+        output_birth(sa_ref, sa_url, value_dict)
+    elif value_dict["event"] == "Death":
+        output_death(sa_ref, sa_url, value_dict)
+    elif value_dict["event"] == "Marriage":
+        output_marriage(sa_ref, sa_url, value_dict)
+    elif value_dict["event"] != "":
+        msg_text.set("Unexpected event type: " + value_dict["event"])
+        output_text.set("")
+    else:
+        output_text.set("")
     return
 
 def gen_wa():
     clip = get_html()
     if clip == None:
         msg_text.set("Unable to read HTML clipboard")
+        output_text.set("")
         return
     value_dict = parse_wa_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -468,6 +571,7 @@ def gen_wa():
         output_marriage(wa_ref, wa_url, value_dict)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
+        output_text.set("")
     return
 
 # Setup the window
@@ -491,10 +595,12 @@ nsw_button = tk.Button(button_frame, text="NSW", command=nsw_panel, width=8)
 nsw_button.grid(row=0, column=0, padx=5)
 qld_button = tk.Button(button_frame, text="Qld", command=qld_panel, width=8)
 qld_button.grid(row=0, column=1, padx=5)
+sa_button = tk.Button(button_frame, text="SA", command=sa_panel, width=8)
+sa_button.grid(row=0, column=2, padx=5)
 vic_button = tk.Button(button_frame, text="Vic", command=vic_panel, width=8)
-vic_button.grid(row=0, column=2, padx=5)
+vic_button.grid(row=0, column=3, padx=5)
 wa_button = tk.Button(button_frame, text="WA", command=wa_panel, width=8)
-wa_button.grid(row=0, column=3, padx=5)
+wa_button.grid(row=0, column=4, padx=5)
 # other states will go here
 
 # NSW frame
@@ -513,6 +619,11 @@ tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=1, column=0, pad
 vic_frame = tk.Frame(root)
 tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
+
+# SA frame
+sa_frame = tk.Frame(root)
+tk.Label(sa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
+tk.Button(sa_frame, text="Generate", command=gen_sa).grid(row=1, column=0, padx=5, pady=3)
 
 # WA frame
 wa_frame = tk.Frame(root)

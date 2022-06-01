@@ -29,7 +29,13 @@ The generated text is also shown at the bottom of the window.
 Victoria and Queensland have a field in the BDM output for the type of record, so only one button is required.
 For NSW you need to tell the program what type of record you are viewing, so there are three buttons, one for each type.
 
+When selecting the text to be copied you need to highlight all the data fields in the row, then right click and select copy.
+The field indicating document availability or linking to details is not required, and for NSW at least you will have trouble highlighting it anyway.
+
 ## Version History
+
+### Version 1.9
+* Add support for South Australia (Genealogy SA)
 
 ### Version 1.8
 * Add support for Western Australia
