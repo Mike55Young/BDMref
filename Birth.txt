@@ -1,2 +1,0 @@
-{|title|}{ (|url|)} Birth registration #{ |ref|}{, |family name,U|}{ |given name,C|}{, Date: |date|}
-{, Father: |father,C|}{, Mother:{ |mother,C|}{ |mother family,C|}}{, Registry: |district,C|}{, Location: |location|}

@@ -232,14 +232,28 @@ def init_value_dict():
 # Browsers are inconsisten in their handling of text clips from website pseudo tables
 # the most reliable way to get the fields into the correct variables is to read the HTML clipboard
 
+# find the next occurrence of a specified tag (or just the next tag if the name is null)
+def get_tag(clip, tag_prefix, p):
+    tag_suffix = ""
+    s = "<" + tag_prefix
+    i = clip.find(s, p)
+    if i >= 0:
+        i += 1
+        j = clip.find(">", i)
+        tag_text = clip[i:j]
+        if tag_prefix == "":
+            tag_prefix, tag_suffix = tag_text.split(" ",1)
+        else:
+            tag_suffix = tag_text[len(tag_prefix):]
+        i = j + 1
+    return i, tag_prefix, tag_suffix
+
 # NSW parsing functions
-def get_pair(s):
-    # extract the part of the wicketpath value from the last underscore to the close quote, and the value between the span tags
-    # html has the format <span wicketpath="data_key_name">data_value</span>
+def get_key(s):
+    # extract the part of the wicketpath value from the last underscore to the close quote
+    # html has the format <span wicketpath="data_key_name">
     wpath = s.split('"')[1]
-    tag_name = wpath.split('_')[-1]
-    tag_value = s.split('>')[1]
-    return tag_name, tag_value
+    return wpath.split('_')[-1]
 
 def parse_nsw_html(clip):
     item_num = ""
@@ -248,10 +262,11 @@ def parse_nsw_html(clip):
     value_dict = init_value_dict()
     
     # find the strings starting with <span wicketpath...> and ending in </span>
-    i = clip.find("<span wicketpath=")
-    while i != -1:
+    i, tag_prefix, tag_suffix = get_tag(clip, "span wicketpath=", 0)
+    while i >= 0:
+        tag_name = get_key(tag_suffix)
         j = clip.find("</span>", i)
-        tag_name, tag_value = get_pair(clip[i:j])
+        tag_value = clip[i:j]
         # set a variable based on the returned name/value pair
         if tag_name == "subjectFamilyName":
             value_dict["family name"] = tag_value
@@ -280,7 +295,7 @@ def parse_nsw_html(clip):
         else:
             # just in case there is a field not previously used...
             print(tag_name + "=" + tag_value)
-        i = clip.find("<span wicketpath=", j)
+        i, tag_prefix, tag_suffix = get_tag(clip, "span wicketpath=", j)
     if item_ref != "":
         value_dict["reg no"] = item_num + "/" + item_year + " " + item_ref
     else:
@@ -292,11 +307,12 @@ def parse_vic_html(clip):
     value_dict = init_value_dict()
     field_list = []
     # Find strings bounded by <span> </span> and create a list corresponding to the columns on the page
-    i = clip.find("<span>")
+    i = clip.find("<span")
     while i != -1:
+        i = clip.find(">", i)
         j = clip.find("</span>", i)
-        field_list.append(clip[i+6:j].strip())
-        i = clip.find("<span>", j)
+        field_list.append(clip[i+1:j].strip())
+        i = clip.find("<span", j)
     if len(field_list) < 12:
         msg_text.set("Not enough columns copied - expecting 12, got " + str(len(field_list)))
         

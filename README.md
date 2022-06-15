@@ -32,7 +32,16 @@ For NSW you need to tell the program what type of record you are viewing, so the
 When selecting the text to be copied you need to highlight all the data fields in the row, then right click and select copy.
 The field indicating document availability or linking to details is not required, and for NSW at least you will have trouble highlighting it anyway.
 
+## Configuration
+
+Config.ini contains the initialisation data such as the names of the BDM websites, their URLs and the name of the output format file.
+The format file is used to define the layout of the generated citation. Details can be found in the file itself.
+
 ## Version History
+
+### Version 2.0
+* Support website change
+* Add config file and user defined formatting
 
 ### Version 1.9
 * Add support for South Australia (Genealogy SA)
