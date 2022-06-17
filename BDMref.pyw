@@ -5,11 +5,13 @@ __Version__ = "1.9"
 #
 import tkinter as tk
 import string
+import os
 import win32clipboard
 
 outtext = ""
 
-# Constants
+# Constants - These strings will normally come from the Config.ini file
+# the values here will only be used if Config.ini is unreadable.
 nsw_ref = "New South Wales Family History - Births, Deaths and Marriages Search"
 nsw_url = "https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search"
 qld_ref = "Queensland Government family history research service"
@@ -20,6 +22,7 @@ vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
 vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
 wa_ref = "Western Australia Department of Justice - Online Index Search"
 wa_url = "https://www.wa.gov.au/organisation/department-of-justice/online-index-search-tool"
+format_name = "Format.ini"
 
 # Element type constants for the HTML parser
 START_TAG = 1
@@ -119,6 +122,106 @@ def output_reference(out):
     root.clipboard_clear()
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
+
+def output_var(state_ref, state_url, value_dict, var_list):
+    var_key = var_list[1]
+    var_style = ""
+    if var_key[-2] == ",":
+        var_style = var_key[-1]
+        var_key = var_key[:-2]
+    if var_key == "title":
+        var_value = state_ref
+    elif var_key == "url":
+        var_value = state_url
+    elif value_dict[var_key] != "":
+        var_value = value_dict[var_key]
+    else:
+        var_value = ""
+    if var_value != "":        
+        if var_style == "C":
+            var_value = var_value.title()
+        elif var_style == "U":
+            var_value = var_value.upper()
+        elif var_style == "L":
+            var_value = var_value.lower()
+        return var_list[0] + var_value + var_list[2]
+    else:
+        return ""
+
+def output_group(state_ref, state_url, value_dict, group_list):
+    group_text = ""
+    var_present = False
+    for group_entry in group_list:
+        if len(group_entry) > 1:
+            group_text += group_entry[0]
+            var_text = output_var(state_ref, state_url, value_dict, group_entry[1])
+            if var_text != "":
+                var_present = True
+                group_text += var_text
+    if var_present:
+        return group_text
+    else:
+        return ""
+
+def output_format(state_ref, state_url, value_dict, format_list):
+    TYPE = 0
+    VALUE = 1
+    output_text = ""
+    for format_entry in format_list:
+        if format_entry[TYPE] == "text":
+            output_text += format_entry[VALUE]
+        elif format_entry[TYPE] == "group":
+            output_text += output_group(state_ref, state_url, value_dict, format_entry[VALUE])
+        elif format_entry[TYPE] == "var":
+            output_text += output_var(state_ref, state_url, value_dict, format_entry[VALUE])
+    output_reference(output_text)
+            
+def parse_format(format_text):
+    txt = ""
+    nest_level = 0
+    is_var = False
+    format_list = []
+    group_list = []
+    var_list = []
+    for c in format_text:
+        if c == "{":
+            if is_var:
+                return ["Can't have a variable within another variable"]
+            if nest_level == 0:
+                if txt != "":
+                    format_list.append(["text",txt])
+                    txt = ""
+            else:
+                group_text = txt
+                txt = ""
+            nest_level += 1
+        elif c == "|":
+            if nest_level > 0:
+                is_var = True
+                var_list.append(txt)
+                txt = ""
+        elif c == "}":
+            if is_var:
+                var_list.append(txt)
+                txt = ""
+                if nest_level > 1:
+                    group_list.append([group_text,var_list])
+                    group_text = ""
+                else:
+                    format_list.append(["var", var_list])
+                is_var = False
+                var_list = []
+            else:
+                if txt != "":
+                    group_list.append([txt])
+                    txt = ""
+                format_list.append(["group", group_list])
+            nest_level -= 1
+        else:
+            txt += c
+    if txt != "":
+        format_list.append(["text", txt])
+    return format_list
 
 def output_birth(state_ref, state_url, value_dict):
     out = state_ref + " (" + state_url + ") Birth registration # " + value_dict["reg no"]
@@ -493,7 +596,8 @@ def gen_nsw_birth():
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    output_birth(nsw_ref, nsw_url, value_dict)
+    output_format(nsw_ref, nsw_url, value_dict, birth_format)
+    # output_birth(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_death():
     clip = get_html()
@@ -589,6 +693,69 @@ def gen_wa():
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")
     return
+
+# Load the Config.ini file
+mypath = os.path.dirname(os.path.realpath(__file__))
+
+try:
+    f = open(mypath + "/Config.ini","r")
+    config_data = f.read()
+    f.close()
+    config_lines = config_data.split("\n")
+except:
+    msg_txt.set(mypath + "/Config.ini is empty or missing")
+    config_lines = []
+
+for config_entry in config_lines:
+    if config_entry != "":
+        config_key, config_value = config_entry.split("=")
+        if config_key == "format":
+            format_name = config_value
+        elif config_key == "nsw_ref":
+            nsw_ref = config_value
+        elif config_key == "nsw_url":
+            nsw_url = config_value
+        elif config_key == "qld_ref":
+            qld_ref = config_value
+        elif config_key == "qld_url":
+            qld_url = config_value
+        elif config_key == "sa_ref":
+            sa_ref = config_value
+        elif config_key == "sa_url":
+            sa_url = config_value
+        elif config_key == "vic_ref":
+            vic_ref = config_value
+        elif config_key == "vic_url":
+            vic_url = config_value
+        elif config_key == "wa_ref":
+            wa_ref = config_value
+        elif config_key == "wa_url":
+            wa_url = config_value
+
+# Now read the Format file
+try:
+    f = open(mypath + "/" + format_name,"r")
+    format_data = f.read()
+    f.close()
+except:
+    msg_txt.set(mypath + "/" + format_name + " is empty or missing")
+    format_data = ""
+
+i = format_data.find("\nBirth")
+j = format_data.find("\nDeath")
+k = format_data.find("\nMarriage")
+i1 = format_data.find("\n", i+1)
+j1 = format_data.find("\n", j+1)
+k1 = format_data.find("\n", k+1)
+birth_format = parse_format(format_data[i1+1:j])
+death_format = parse_format(format_data[j1+1:k])
+marriage_format = parse_format(format_data[k1+1:])
+print("-Birth-")
+print(birth_format)
+print("-Death-")
+print(death_format)
+print("-Marriage-")
+print(marriage_format)
 
 # Setup the window
 
