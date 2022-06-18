@@ -216,6 +216,7 @@ def parse_format(format_text):
                     group_list.append([txt])
                     txt = ""
                 format_list.append(["group", group_list])
+                group_list = []
             nest_level -= 1
         else:
             txt += c
@@ -437,7 +438,7 @@ def parse_vic_html(clip):
         value_dict["father"] = name_given.strip()
     value_dict["location birth"] = field_list[6]
     value_dict["location death"] = field_list[7]
-    if field_list[8] != "<Unknown Family Name>":
+    if field_list[8] != "&lt;Unknown Family Name&gt;":
         value_dict["death spouse"] = field_list[8]
     value_dict["age"] = field_list[9]
     value_dict["date"] = field_list[10]
@@ -607,7 +608,8 @@ def gen_nsw_death():
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    output_death(nsw_ref, nsw_url, value_dict)
+    output_format(nsw_ref, nsw_url, value_dict, death_format)
+    # output_death(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_marriage():
     clip = get_html()
@@ -617,7 +619,8 @@ def gen_nsw_marriage():
         return
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
-    output_marriage(nsw_ref, nsw_url, value_dict)
+    output_format(nsw_ref, nsw_url, value_dict, marriage_format)
+    # output_marriage(nsw_ref, nsw_url, value_dict)
 
 def gen_vic():
     clip = get_html()
@@ -627,11 +630,11 @@ def gen_vic():
         return
     value_dict = parse_vic_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
-        output_birth(vic_ref, vic_url, value_dict)
+        output_format(vic_ref, vic_url, value_dict, birth_format)
     elif value_dict["event"] == "Death":
-        output_death(vic_ref, vic_url, value_dict)
+        output_format(vic_ref, vic_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
-        output_marriage(vic_ref, vic_url, value_dict)
+        output_format(vic_ref, vic_url, value_dict, marriage_format)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")
@@ -646,11 +649,11 @@ def gen_qld():
     value_dict = parse_qld_html(clip.decode('utf-8'))
     qld_url = value_dict["url"]
     if value_dict["event"] == "Birth":
-        output_birth(qld_ref, qld_url, value_dict)
+        output_format(qld_ref, qld_url, value_dict, birth_format)
     elif value_dict["event"] == "Death":
-        output_death(qld_ref, qld_url, value_dict)
+        output_format(qld_ref, qld_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
-        output_marriage(qld_ref, qld_url, value_dict)
+        output_format(qld_ref, qld_url, value_dict, marriage_format)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")
@@ -664,11 +667,11 @@ def gen_sa():
         return
     value_dict = parse_sa_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
-        output_birth(sa_ref, sa_url, value_dict)
+        output_format(sa_ref, sa_url, value_dict, birth_format)
     elif value_dict["event"] == "Death":
-        output_death(sa_ref, sa_url, value_dict)
+        output_format(sa_ref, sa_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
-        output_marriage(sa_ref, sa_url, value_dict)
+        output_format(sa_ref, sa_url, value_dict, marriage_format)
     elif value_dict["event"] != "":
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")
@@ -684,11 +687,11 @@ def gen_wa():
         return
     value_dict = parse_wa_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
-        output_birth(wa_ref, wa_url, value_dict)
+        output_format(wa_ref, wa_url, value_dict, birth_format)
     elif value_dict["event"] == "Death":
-        output_death(wa_ref, wa_url, value_dict)
+        output_format(wa_ref, wa_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
-        output_marriage(wa_ref, wa_url, value_dict)
+        output_format(wa_ref, wa_url, value_dict, marriage_format)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")
@@ -708,29 +711,33 @@ except:
 
 for config_entry in config_lines:
     if config_entry != "":
-        config_key, config_value = config_entry.split("=")
-        if config_key == "format":
-            format_name = config_value
-        elif config_key == "nsw_ref":
-            nsw_ref = config_value
-        elif config_key == "nsw_url":
-            nsw_url = config_value
-        elif config_key == "qld_ref":
-            qld_ref = config_value
-        elif config_key == "qld_url":
-            qld_url = config_value
-        elif config_key == "sa_ref":
-            sa_ref = config_value
-        elif config_key == "sa_url":
-            sa_url = config_value
-        elif config_key == "vic_ref":
-            vic_ref = config_value
-        elif config_key == "vic_url":
-            vic_url = config_value
-        elif config_key == "wa_ref":
-            wa_ref = config_value
-        elif config_key == "wa_url":
-            wa_url = config_value
+        # ignore lines starting in # - they are comments
+        if config_entry[0] != "#":
+            config_key, config_value = config_entry.split("=")
+            if config_key == "format":
+                format_name = config_value
+            elif config_key == "date":
+                format_date = config_value
+            elif config_key == "nsw_ref":
+                nsw_ref = config_value
+            elif config_key == "nsw_url":
+                nsw_url = config_value
+            elif config_key == "qld_ref":
+                qld_ref = config_value
+            elif config_key == "qld_url":
+                qld_url = config_value
+            elif config_key == "sa_ref":
+                sa_ref = config_value
+            elif config_key == "sa_url":
+                sa_url = config_value
+            elif config_key == "vic_ref":
+                vic_ref = config_value
+            elif config_key == "vic_url":
+                vic_url = config_value
+            elif config_key == "wa_ref":
+                wa_ref = config_value
+            elif config_key == "wa_url":
+                wa_url = config_value
 
 # Now read the Format file
 try:
