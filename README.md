@@ -34,14 +34,16 @@ The field indicating document availability or linking to details is not required
 
 ## Configuration
 
-Config.ini contains the initialisation data such as the names of the BDM websites, their URLs and the name of the output format file.
+Config.ini contains the initialisation data such as the names of the BDM websites, their URLs, the date format, and the name of the output format file.
 The format file is used to define the layout of the generated citation. Details can be found in the file itself.
 
 ## Version History
 
 ### Version 2.0
-* Support website change
+* Support a website change
 * Add config file and user defined formatting
+* Provide for the current date to be inserted as an access date
+* Treat lines starting with # in Config.ini as comments to be skipped
 
 ### Version 1.9
 * Add support for South Australia (Genealogy SA)

@@ -1,10 +1,11 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "1.9"
+__Version__ = "2.0"
 
 #
 import tkinter as tk
 import string
+import time
 import os
 import win32clipboard
 
@@ -23,6 +24,8 @@ vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-fa
 wa_ref = "Western Australia Department of Justice - Online Index Search"
 wa_url = "https://www.wa.gov.au/organisation/department-of-justice/online-index-search-tool"
 format_name = "Format.ini"
+format_date = "dd mmm yyyy"
+# End of Config defaults
 
 # Element type constants for the HTML parser
 START_TAG = 1
@@ -116,6 +119,55 @@ def wa_panel():
     msg_text.set("")
 
 # Output functions --------------------------
+# Function to return todays date in a specified format
+def get_date(dform):
+    # print "Inserting date with format", dform
+    # Date format is flexible, and the following are recognised:
+    # d - day of month - leading zero suppressed
+    # dd - day of month - always 2 digits
+    # m - month number - leading zero suppressed
+    # mm - month number - always 2 digits
+    # mmm - month name (3 letters)
+    # mmmm - full month name
+    # yy - year (2 digit)
+    # yyyy - year (4 digit)
+    # other characters including spaces are copied as is
+    outdate = ""
+    (year, month, day) = time.localtime()[0:3]
+    i = 0
+    while i < len(dform):
+        if dform[i:i+2] == 'dd':
+            d2 = '0' + str(day)
+            outdate = outdate + d2[-2:]
+            i = i + 2
+        elif dform[i:i+1] == 'd':
+            outdate = outdate + str(day)
+            i = i + 1
+        elif dform[i:i+4] == 'mmmm':
+            outdate = outdate + ('January','February','March','April','May','June','July','August','September','October','November','December')[month-1]
+            i = i + 4
+        elif dform[i:i+3] == 'mmm':
+            outdate = outdate + ('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec')[month-1]
+            i = i + 3
+        elif dform[i:i+2] == 'mm':
+            m2 = '0' + str(month)
+            outdate = outdate + m2[-2:]
+            i = i + 2
+        elif dform[i:i+1] == 'm':
+            outdate = outdate + str(month)
+            i = i + 1
+        elif dform[i:i+4] == 'yyyy':
+            outdate = outdate + str(year)
+            i = i + 4
+        elif dform[i:i+2] == 'yy':
+            outdate = outdate + str(year)[-2:]
+            i = i + 2
+        else:
+			# copy other characters to output as is
+            outdate = outdate + dform[i]
+            i = i + 1
+    return(outdate)
+
 # Copy the generated reference to the clipboard and the output box
 def output_reference(out):
     output_text.set(out)
@@ -133,6 +185,8 @@ def output_var(state_ref, state_url, value_dict, var_list):
         var_value = state_ref
     elif var_key == "url":
         var_value = state_url
+    elif var_key == "today":
+        var_value = get_date(format_date)
     elif value_dict[var_key] != "":
         var_value = value_dict[var_key]
     else:
@@ -158,6 +212,8 @@ def output_group(state_ref, state_url, value_dict, group_list):
             if var_text != "":
                 var_present = True
                 group_text += var_text
+        else:
+            group_text += group_entry[0]
     if var_present:
         return group_text
     else:
@@ -224,84 +280,6 @@ def parse_format(format_text):
         format_list.append(["text", txt])
     return format_list
 
-def output_birth(state_ref, state_url, value_dict):
-    out = state_ref + " (" + state_url + ") Birth registration # " + value_dict["reg no"]
-    if value_dict["name"] != "":
-        out += ", " + value_dict["name"]
-    else:
-        out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
-    if value_dict["gender"] != "":
-        out += ", Gender: " + value_dict["gender"] 
-    if value_dict["father"] != "":
-        out += ", Father: " + string.capwords(value_dict["father"]) 
-    if value_dict["mother"] != "":
-        out += ", Mother: " + string.capwords(value_dict["mother"])
-    if value_dict["parent"] != "":
-        out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
-    if value_dict["mother family"] != "":
-        out += " " + value_dict["mother family"]
-    if value_dict["date"] != "":
-        out += ", Date: " + value_dict["date"]
-    if value_dict["location birth"] != "":
-        out += ", Birth Location: " + value_dict["location birth"]
-    if value_dict["district"] != "":
-        out += ", Registry: " + string.capwords(value_dict["district"])
-    output_reference(out)
-
-def output_death(state_ref, state_url, value_dict):
-    out = state_ref + " (" + state_url + ") Death registration # " + value_dict["reg no"]
-    if value_dict["name"] != "":
-        out += ", " + value_dict["name"]
-    else:
-        out += ", " + value_dict["family name"] + " " +  string.capwords(value_dict["given name"])
-    if value_dict["gender"] != "":
-        out += ", Gender: " + value_dict["gender"] 
-    if value_dict["father"] != "":
-        out += ", Father: " + string.capwords(value_dict["father"]) 
-    if value_dict["mother"] != "":
-        out += ", Mother: " + string.capwords(value_dict["mother"])
-    if value_dict["parent"] != "":
-        out += ", Father/parent: " + string.capwords(value_dict["parent"]) 
-    if value_dict["mother family"] != "":
-        out += " " + value_dict["mother family"]
-    if value_dict["date"] != "":
-        out += ", Date: " + value_dict["date"]
-    if value_dict["age"] != "":
-        out += ", Age: " + value_dict["age"]
-    if value_dict["dob"] != "":
-        out += ", Date of Birth: " + value_dict["dob"]
-    if value_dict["location birth"] != "":
-        out += ", Birth Location: " + value_dict["location birth"]
-    if value_dict["location death"] != "":
-        out += ", Death Location: " + value_dict["location death"]
-    if value_dict["district"] != "":
-        out += ", Registry: " + string.capwords(value_dict["district"])
-    output_reference(out)
-
-def output_marriage(state_ref, state_url, value_dict):
-    out = state_ref + " (" + state_url + ") Marriage registration # " + value_dict["reg no"]
-    if value_dict["groom given"] != "":
-        out += ", Groom: " + string.capwords(value_dict["groom given"]) + " " + string.capwords(value_dict["groom family"])
-        out += ", Bride: " + string.capwords(value_dict["bride given"]) + " " + string.capwords(value_dict["bride family"])
-    elif value_dict["name"] != "":
-        out += ", " + value_dict["name"]
-    elif value_dict["family name"] != "":
-        out += ", " + value_dict["family name"] + " " + string.capwords(value_dict["given name"])
-        if value_dict["gender"] != "":
-            out += ", Gender: " + value_dict["gender"]
-        out += ", Spouse: " + string.capwords(value_dict["spouse given"]) + " " + string.capwords(value_dict["spouse family"])
-    if value_dict["spouse"] != "":
-        out += ", Spouse: " + string.capwords(value_dict["spouse"])
-    if value_dict["spouse gender"] != "":
-        out += ", Spouse gender: " + string.capwords(value_dict["spouse gender"])
-    if value_dict["date"] != "":
-        out += ", Date: " + value_dict["date"]
-    if value_dict["location"] != "":
-        out += ", Marriage Location: " + value_dict["location"]
-    if value_dict["district"] != "":
-        out += ", Registry: " + string.capwords(value_dict["district"])
-    output_reference(out)
-
 # initialise a dictionary to transfer data from the parsing functions to the output functions
 def init_value_dict():
     value_dict = {"family name": "",
@@ -352,7 +330,7 @@ def get_tag(clip, tag_prefix, p):
         i = j + 1
     return i, tag_prefix, tag_suffix
 
-# NSW parsing functions
+# HTML parsing functions
 def get_key(s):
     # extract the part of the wicketpath value from the last underscore to the close quote
     # html has the format <span wicketpath="data_key_name">
@@ -598,7 +576,6 @@ def gen_nsw_birth():
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
     output_format(nsw_ref, nsw_url, value_dict, birth_format)
-    # output_birth(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_death():
     clip = get_html()
@@ -609,7 +586,6 @@ def gen_nsw_death():
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
     output_format(nsw_ref, nsw_url, value_dict, death_format)
-    # output_death(nsw_ref, nsw_url, value_dict)
 
 def gen_nsw_marriage():
     clip = get_html()
@@ -620,7 +596,6 @@ def gen_nsw_marriage():
     value_dict = parse_nsw_html(str(clip))
     # print(value_dict)
     output_format(nsw_ref, nsw_url, value_dict, marriage_format)
-    # output_marriage(nsw_ref, nsw_url, value_dict)
 
 def gen_vic():
     clip = get_html()
@@ -757,15 +732,8 @@ k1 = format_data.find("\n", k+1)
 birth_format = parse_format(format_data[i1+1:j])
 death_format = parse_format(format_data[j1+1:k])
 marriage_format = parse_format(format_data[k1+1:])
-print("-Birth-")
-print(birth_format)
-print("-Death-")
-print(death_format)
-print("-Marriage-")
-print(marriage_format)
 
 # Setup the window
-
 root = tk.Tk()
 
 root.title("Wikitree BDM Reference Generator v" + __Version__)
