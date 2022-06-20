@@ -39,6 +39,9 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.1
+* Add a button to open the BDM website for the selected state in your default browser
+
 ### Version 2.0
 * Support a website change
 * Add config file and user defined formatting

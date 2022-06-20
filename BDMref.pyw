@@ -8,6 +8,7 @@ import string
 import time
 import os
 import win32clipboard
+import webbrowser
 
 outtext = ""
 
@@ -672,6 +673,21 @@ def gen_wa():
         output_text.set("")
     return
 
+def open_nsw_web():
+    webbrowser.open(nsw_url)
+    
+def open_qld_web():
+    webbrowser.open(qld_url)
+
+def open_sa_web():
+    webbrowser.open(sa_url)
+
+def open_vic_web():
+    webbrowser.open(vic_url)
+
+def open_wa_web():
+    webbrowser.open(wa_url)
+
 # Load the Config.ini file
 mypath = os.path.dirname(os.path.realpath(__file__))
 
@@ -767,26 +783,31 @@ tk.Label(nsw_frame, text="Copy a row on the browser, then click on the button be
 tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=1, column=0, padx=5, pady=3)
 tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=1, column=1, padx=5, pady=3)
 tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
+tk.Button(nsw_frame, text="Open BDM Website", command=open_nsw_web, width=20).grid(row=2, column=0, columnspan=3, padx=5)
 
 # Qld frame
 qld_frame = tk.Frame(root)
 tk.Label(qld_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(qld_frame, text="Open BDM Website", command=open_qld_web, width=20).grid(row=2, column=0, padx=5)
 
 # Vic frame
 vic_frame = tk.Frame(root)
 tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(vic_frame, text="Open BDM Website", command=open_vic_web, width=20).grid(row=2, column=0, padx=5)
 
 # SA frame
 sa_frame = tk.Frame(root)
 tk.Label(sa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(sa_frame, text="Generate", command=gen_sa).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(sa_frame, text="Open BDM Website", command=open_sa_web, width=20).grid(row=2, column=0, padx=5)
 
 # WA frame
 wa_frame = tk.Frame(root)
 tk.Label(wa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
 tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=1, column=0, padx=5, pady=3)
+tk.Button(wa_frame, text="Open BDM Website", command=open_wa_web, width=20).grid(row=2, column=0, padx=5)
 
 # output area (optional - mostly for debug, but it does allow you to check the result before pasting it)
 output_box = tk.Label(root, textvariable=output_text, width=70, height=5, wrap=490, justify="left", anchor="nw", relief="sunken")
