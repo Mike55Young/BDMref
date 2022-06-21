@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "2.0"
+__Version__ = "2.2"
 
 #
 import tkinter as tk
@@ -296,8 +296,14 @@ def init_value_dict():
                   "district": "",
                   "groom given": "",
                   "groom family": "",
+                  "groom age": "",
+                  "groom status": "",
+                  "groom father": "",
                   "bride given": "",
                   "bride family": "",
+                  "bride age": "",
+                  "bride status": "",
+                  "bride father": "",
                   "spouse given": "",
                   "spouse family": "",
                   "spouse": "",
@@ -306,8 +312,12 @@ def init_value_dict():
                   "location birth": "",
                   "location death": "",
                   "date": "",
+                  "year": "",
                   "dob": "",
                   "age": "",
+                  "notes": "",
+                  "relative": "",
+                  "marital status": "",
                   "death spouse": ""
                   }
     return value_dict
@@ -458,16 +468,16 @@ def parse_qld_html(clip):
         i = clip.find("<br>", j)
     return value_dict
  
-def parse_sa_html(clip):
+def parse_sa_list(clip):
     value_dict = init_value_dict()
     field_list = []
-    # Find strings bounded by <td class=""> </td> and create a list corresponding to the columns on the page
-    i = clip.find('<td class="">')
+    # Find strings bounded by <td...> </td> and create a list corresponding to the columns on the page
+    i = clip.find('<td')
     while i != -1:
-        i += len('<td class="">')
+        i = clip.find('>', i) + 1
         j = clip.find("</td>", i)
         field_list.append(clip[i:j].strip())
-        i = clip.find('<td class="">', j)
+        i = clip.find('<td', j)
     if len(field_list) < 6:
         msg_text.set("Should be at least 6 columns but found " + str(len(field_list)))
         return value_dict
@@ -509,8 +519,99 @@ def parse_sa_html(clip):
     # Last 3 are always district, book/page and year
     value_dict["district"] = field_list[-3]
     value_dict["reg no"] = field_list[-2]
-    value_dict["date"] = field_list[-1]
+    value_dict["year"] = field_list[-1]
     return value_dict
+
+def parse_sa_detail(clip):
+    value_dict = init_value_dict()
+    field_list = []
+    # parse the detail output
+    i = clip.find('<span class="gsa_field_name')
+    while i != -1:
+        i = clip.find('>', i)
+        j = clip.find('</span>', i)
+        field_name = clip[i+1:j]
+        i = clip.find('<span class="gsa_field_value', j)
+        i = clip.find('>', i)
+        j = clip.find('</span>', i)
+        field_value = clip[i+1:j]
+        if field_value.find('(members only)') == -1:
+            if field_name == "Groom Surname:":
+                value_dict["groom family"] = field_value
+            elif field_name == "Groom Given Names:":
+                value_dict["groom given"] = field_value
+            elif field_name == "Bride Surname:":
+                value_dict["bride family"] = field_value
+            elif field_name == "Bride Given Names:":
+                value_dict["bride given"] = field_value
+            elif field_name == "Marriage Date:":
+                value_dict["date"] = field_value
+            elif field_name == "Marriage Place:":
+                value_dict["location"] = field_value
+            elif field_name == "Groom Age:":
+                value_dict["groom age"] = field_value
+            elif field_name == "Groom Marital Status:":
+                value_dict["groom status"] = field_value
+            elif field_name == "Groom Father:":
+                value_dict["groom father"] = field_value
+            elif field_name == "Bride Age:":
+                value_dict["bride age"] = field_value
+            elif field_name == "Bride Marital Status:":
+                value_dict["bride status"] = field_value
+            elif field_name == "Bride Father:":
+                value_dict["bride father"] = field_value
+            elif field_name == "Surname:":
+                value_dict["family name"] = field_value
+            elif field_name == "First Names:":
+                value_dict["given name"] = field_value
+            elif field_name == "Given Names:":
+                value_dict["given name"] = field_value
+            elif field_name == "Date of Birth:":
+                value_dict["date"] = field_value
+            elif field_name == "Gender:":
+                value_dict["gender"] = field_value
+            elif field_name == "Father:":
+                value_dict["father"] = field_value
+            elif field_name == "Mother:":
+                value_dict["mother"] = field_value
+            elif field_name == "Birth Residence:":
+                value_dict["location"] = field_value
+            elif field_name == "Death Date:":
+                value_dict["date"] = field_value
+            elif field_name == "Age:":
+                value_dict["age"] = field_value
+            elif field_name == "Marital Status:":
+                value_dict["marital status"] = field_value
+            elif field_name == "Relative:":
+                value_dict["relative"] = field_value
+            elif field_name == "Place of Death:":
+                value_dict["location death"] = field_value
+            elif field_name == "District:":
+                value_dict["district"] = field_value
+            elif field_name == "Book/Page:":
+                value_dict["reg no"] = field_value
+            elif field_name == "Notes:":
+                value_dict["notes"] = field_value
+            elif field_name == "Marriage Year:":
+                value_dict["event"] = "Marriage"
+                value_dict["year"] = field_value
+            elif field_name == "Birth Year:":
+                value_dict["event"] = "Birth"
+                value_dict["year"] = field_value
+            elif field_name == "Death Year:":
+                value_dict["event"] = "Death"
+                value_dict["year"] = field_value
+        i = clip.find('<span class="gsa_field_name', j)
+           
+    return value_dict
+
+def parse_sa_html(clip):
+    if clip.find("<table") > 0:
+        return parse_sa_list(clip)
+    elif clip.find('<div class="gsa_userdetail') > 0:
+        return parse_sa_detail(clip)
+    else:
+        return "Not a valid SA clip."
 
 def parse_wa_html(clip):
     value_dict = init_value_dict()
@@ -623,13 +724,12 @@ def gen_qld():
         output_text.set("")
         return
     value_dict = parse_qld_html(clip.decode('utf-8'))
-    qld_url = value_dict["url"]
     if value_dict["event"] == "Birth":
-        output_format(qld_ref, qld_url, value_dict, birth_format)
+        output_format(qld_ref, value_dict["url"], value_dict, birth_format)
     elif value_dict["event"] == "Death":
-        output_format(qld_ref, qld_url, value_dict, death_format)
+        output_format(qld_ref, value_dict["url"], value_dict, death_format)
     elif value_dict["event"] == "Marriage":
-        output_format(qld_ref, qld_url, value_dict, marriage_format)
+        output_format(qld_ref, value_dict["url"], value_dict, marriage_format)
     else:
         msg_text.set("Unexpected event type: " + value_dict["event"])
         output_text.set("")

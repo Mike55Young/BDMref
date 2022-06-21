@@ -39,6 +39,11 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.2
+* Support SA website change and tolerate future changes better
+* Support SA detail page (primarily useful for SA Genealogy members)
+* SA now outputs the event year in a new variable "year" instead of "date". Default format file puts this after the reference number.
+
 ### Version 2.1
 * Add a button to open the BDM website for the selected state in your default browser
 
