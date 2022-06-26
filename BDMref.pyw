@@ -448,23 +448,25 @@ def parse_qld_html(clip):
     while i != -1:
         i = clip.find(">", i) + 1
         j = clip.find("<", i)
-        field_type, field_value = clip[i:j].strip().split(":")
-        if field_type == "Event date":
-            value_dict["date"] = field_value.strip()
-        elif field_type == "Event type":
-            value_dict["event"] = field_value.strip().split(" ")[0]
-        elif field_type == "Registration details":
-            value_dict["reg no"] = field_value.strip()
-        elif field_type == "Mother":
-            value_dict["mother"] = field_value.strip()
-        elif field_type == "Father/parent":
-            value_dict["parent"] = field_value.strip()
-        elif field_type == "Date of birth":
-            value_dict["dob"] = field_value.strip()
-        elif field_type == "Spouse":
-            value_dict["spouse"] = field_value.strip()
-        else:
-            msg_text.set("Unknown type: " + field_type)
+        s = clip[i:j]
+        if s.find(":") > 0:
+            field_type, field_value = clip[i:j].strip().split(":")
+            if field_type == "Event date":
+                value_dict["date"] = field_value.strip()
+            elif field_type == "Event type":
+                value_dict["event"] = field_value.strip().split(" ")[0]
+            elif field_type == "Registration details":
+                value_dict["reg no"] = field_value.strip()
+            elif field_type == "Mother":
+                value_dict["mother"] = field_value.strip()
+            elif field_type == "Father/parent":
+                value_dict["parent"] = field_value.strip()
+            elif field_type == "Date of birth":
+                value_dict["dob"] = field_value.strip()
+            elif field_type == "Spouse":
+                value_dict["spouse"] = field_value.strip()
+            else:
+                msg_text.set("Unknown type: " + field_type)
         i = clip.find("<br", j)
         k = clip.find("<li", j)
         if k > 0 and k < i:
