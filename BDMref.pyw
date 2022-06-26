@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "2.2"
+__Version__ = "2.3"
 
 #
 import tkinter as tk
@@ -444,9 +444,9 @@ def parse_qld_html(clip):
     i = clip.find(">", j)
     j = clip.find("<", i)
     value_dict["name"] = clip[i + 1:j].strip()
-    i = clip.find("<br>", j)
+    i = clip.find("<br", j)
     while i != -1:
-        i += 4
+        i = clip.find(">", i) + 1
         j = clip.find("<", i)
         field_type, field_value = clip[i:j].strip().split(":")
         if field_type == "Event date":
@@ -465,7 +465,10 @@ def parse_qld_html(clip):
             value_dict["spouse"] = field_value.strip()
         else:
             msg_text.set("Unknown type: " + field_type)
-        i = clip.find("<br>", j)
+        i = clip.find("<br", j)
+        k = clip.find("<li", j)
+        if k > 0 and k < i:
+            i = k
     return value_dict
  
 def parse_sa_list(clip):

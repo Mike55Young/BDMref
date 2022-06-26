@@ -39,6 +39,9 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.3
+* Bugfix. Support change to Qld website where first entry in column 2 is no longer the ordering information
+
 ### Version 2.2
 * Support SA website change and tolerate future changes better
 * Support SA detail page (primarily useful for SA Genealogy members)
