@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "2.3"
+__Version__ = "2.4"
 
 #
 import tkinter as tk
@@ -359,7 +359,7 @@ def parse_nsw_html(clip):
     while i >= 0:
         tag_name = get_key(tag_suffix)
         j = clip.find("</span>", i)
-        tag_value = clip[i:j]
+        tag_value = clip[i:j].replace("\\'", "'")
         # set a variable based on the returned name/value pair
         if tag_name == "subjectFamilyName":
             value_dict["family name"] = tag_value
@@ -413,18 +413,30 @@ def parse_vic_html(clip):
     value_dict["family name"] = field_list[0]
     value_dict["given name"] = field_list[1]
     value_dict["event"] = field_list[2]
-    # field 3 needs to be split and stored depending on the event type
-    name_family, name_given = field_list[3].split(',')
+    # field 3 needs to be stored depending on the event type
+    # Some record types always begin <Unknown Family Name>,
+    if field_list[3].find(",") >= 0:
+        name_family, name_given = field_list[3].split(',')
+    else:
+        name_family = field_list[3]
+        name_given = ""
     if value_dict["event"] == "Marriage":
         value_dict["spouse given"] = name_given.strip()
-        value_dict["spouse family"] = name_family.strip()
+        if name_family != "<Unknown Family_Name>":
+            value_dict["spouse family"] = name_family.strip()
     else:
-        value_dict["mother"] = name_given
+        if name_family == "<Unknown Family_Name>":
+            value_dict["mother"] = name_given
+        else:
+            value_dict["mother"] = field_list[3]
     value_dict["mother family"] = field_list[4]
-    # field 5 needs to be split if it is non-blank
-    if field_list[5] != "":
+    # field 5 gets processed to remove <Unknown Family Name> if present
+    if field_list[5].find(",") >= 0:
         name_family, name_given = field_list[5].split(',')
-        value_dict["father"] = name_given.strip()
+        if name_family == "<Unknown Family_Name>":
+            value_dict["father"] = name_given.strip()
+        else:
+            value_dict["father"] = field_list[5]
     value_dict["location birth"] = field_list[6]
     value_dict["location death"] = field_list[7]
     if field_list[8] != "&lt;Unknown Family Name&gt;":
