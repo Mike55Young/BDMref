@@ -396,6 +396,25 @@ def parse_nsw_html(clip):
     # return a dictionary of value pairs
     return value_dict
 
+# Routine to handle names from the Victorian website.
+# Names are in the format Surname, Given Names
+# If the surname is omitted the website displays this as "<Unknown Family Name>" with the < and > converted to &lt; and &gt;
+# If the given name is omitted the comma is omitted too.
+def parse_vic_name(field_value, dict_key, value_dict):
+    if field_value.find(",") >= 0:
+        name_family, name_given = field_value.split(',')
+    else:
+        name_family = field_value
+        name_given = ""
+    if name_family == "&lt;Unknown Family Name&gt;":
+        name_family = ""
+    if name_family == "":
+        value_dict[dict_key] = name_given.strip()
+    elif name_given == "":
+        value_dict[dict_key] = name_family.strip()
+    else:
+        value_dict[dict_key] = field_value.strip()
+
 def parse_vic_html(clip):
     value_dict = init_value_dict()
     field_list = []
@@ -413,34 +432,15 @@ def parse_vic_html(clip):
     value_dict["family name"] = field_list[0]
     value_dict["given name"] = field_list[1]
     value_dict["event"] = field_list[2]
-    # field 3 needs to be stored depending on the event type
-    # Some record types always begin <Unknown Family Name>,
-    if field_list[3].find(",") >= 0:
-        name_family, name_given = field_list[3].split(',')
-    else:
-        name_family = field_list[3]
-        name_given = ""
     if value_dict["event"] == "Marriage":
-        value_dict["spouse given"] = name_given.strip()
-        if name_family != "<Unknown Family_Name>":
-            value_dict["spouse family"] = name_family.strip()
+        parse_vic_name(field_list[3], "spouse", value_dict)
     else:
-        if name_family == "<Unknown Family_Name>":
-            value_dict["mother"] = name_given
-        else:
-            value_dict["mother"] = field_list[3]
+        parse_vic_name(field_list[3], "mother", value_dict)
     value_dict["mother family"] = field_list[4]
-    # field 5 gets processed to remove <Unknown Family Name> if present
-    if field_list[5].find(",") >= 0:
-        name_family, name_given = field_list[5].split(',')
-        if name_family == "<Unknown Family_Name>":
-            value_dict["father"] = name_given.strip()
-        else:
-            value_dict["father"] = field_list[5]
+    parse_vic_name(field_list[5], "father", value_dict)
     value_dict["location birth"] = field_list[6]
     value_dict["location death"] = field_list[7]
-    if field_list[8] != "&lt;Unknown Family Name&gt;":
-        value_dict["death spouse"] = field_list[8]
+    parse_vic_name(field_list[8], "death spouse", value_dict)
     value_dict["age"] = field_list[9]
     value_dict["date"] = field_list[10]
     value_dict["reg no"] = field_list[11]

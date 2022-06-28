@@ -39,6 +39,9 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.5
+* Bugfix. Rework the handling of names on the Victorian website to correctly remove <Unknown Family Name> if present.
+
 ### Version 2.4
 * Bugfix. Program would crash if father's given name was missing on the Victorian website
 * Bugfix. Remove stray "\" from found before apostrophes on the NSW website (e.g. O\Keefe)
