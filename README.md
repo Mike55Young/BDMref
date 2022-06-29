@@ -39,6 +39,14 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.6
+* Increase the size of the output box from 5 rows to 7 rows and enlarge the font to 12pt
+* Improve handling of errors like not copying enough of the row or selecting the wrong state
+* Bugfix. If there was only one row in the second column of the Queensland website it was not collected for output
+* Colour messages red (error) or green (copied to clipboard) to make them more noticeable
+* Update output format files to show gender and marriage location if available. Have not included all the SA (members only) detail fields.
+* Known issue: the correct parsing of the SA website list relies on copying the whole table row (including the View Details link), otherwise a birth might be incorrectly output as a death.
+
 ### Version 2.5
 * Bugfix. Rework the handling of names on the Victorian website to correctly remove <Unknown Family Name> if present.
 

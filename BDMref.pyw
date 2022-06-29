@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "2.5"
+__Version__ = "2.6"
 
 #
 import tkinter as tk
@@ -33,12 +33,21 @@ START_TAG = 1
 END_TAG = 2
 DATA = 3
 
+# Output an error message
+def output_error(t):
+    msg_text.set(t)
+    msgbox["fg"] = "red"
+    output_text.set("")
+
 # Functions to read the clipboard
 # get the clipboard contents as text
 def get_text():
     try:
         win32clipboard.OpenClipboard(0)
         src = win32clipboard.GetClipboardData(win32clipboard.CF_TEXT)
+    except TypeError:
+        output_error("Unable to read clipboard")
+        src = ""
     finally:
         win32clipboard.CloseClipboard()
     return(src)
@@ -49,6 +58,9 @@ def get_html():
         win32clipboard.OpenClipboard(0)
         html_format = win32clipboard.RegisterClipboardFormat("HTML Format")
         src = win32clipboard.GetClipboardData(html_format)
+    except TypeError:
+        output_error("Unable to read HTML clipboard")
+        src = ""
     finally:
         win32clipboard.CloseClipboard()
     return(src)
@@ -175,6 +187,7 @@ def output_reference(out):
     root.clipboard_clear()
     root.clipboard_append(out)
     msg_text.set("Reference copied to clipboard")
+    msgbox["fg"] = "green"
 
 def output_var(state_ref, state_url, value_dict, var_list):
     var_key = var_list[1]
@@ -356,6 +369,10 @@ def parse_nsw_html(clip):
     
     # find the strings starting with <span wicketpath...> and ending in </span>
     i, tag_prefix, tag_suffix = get_tag(clip, "span wicketpath=", 0)
+    if i == -1:
+        output_error("Not a valid NSW clip")
+        value_dict["event"] = "Error"
+        return value_dict
     while i >= 0:
         tag_name = get_key(tag_suffix)
         j = clip.find("</span>", i)
@@ -426,7 +443,9 @@ def parse_vic_html(clip):
         field_list.append(clip[i+1:j].strip())
         i = clip.find("<span", j)
     if len(field_list) < 12:
-        msg_text.set("Not enough columns copied - expecting 12, got " + str(len(field_list)))
+        output_error("Not enough columns copied - expecting 12, got " + str(len(field_list)))
+        value_dict["event"] = "Error"
+        return value_dict
         
     # Now store the columns into the respective dictionary items
     value_dict["family name"] = field_list[0]
@@ -449,6 +468,10 @@ def parse_vic_html(clip):
 def parse_qld_html(clip):
     value_dict = init_value_dict()
     i = clip.find('<a class="recordlink"')
+    if i == -1:
+        output_error("Not a valid Queensland clip - expecting link to details page")
+        value_dict["event"] = "Error"
+        return value_dict
     i = clip.find('href=', i + 20)
     q = clip[i + 5]
     j = clip.find(q, i + 6)
@@ -480,9 +503,10 @@ def parse_qld_html(clip):
             else:
                 msg_text.set("Unknown type: " + field_type)
         i = clip.find("<br", j)
-        k = clip.find("<li", j)
-        if k > 0 and k < i:
-            i = k
+        k = clip.find('<li class="related', j)
+        if k > 0:
+            if k < i or i == -1:
+                i = k
     return value_dict
  
 def parse_sa_list(clip):
@@ -496,15 +520,16 @@ def parse_sa_list(clip):
         field_list.append(clip[i:j].strip())
         i = clip.find('<td', j)
     if len(field_list) < 6:
-        msg_text.set("Should be at least 6 columns but found " + str(len(field_list)))
+        output_error("Should be at least 6 columns but found " + str(len(field_list)))
+        value_dict["event"] = "Error"
         return value_dict
     # Now work out what record type we have.
     # If View Details is the last field copied we can find the type in there.
-    if field_list[-1][0:1] == '<a':
+    if field_list[-1][:2] == '<a':
         i = field_list[-1].find("coid=") + 5
         j = field_list[-1].find("&", i)
         value_dict["event"] = string.capwords(field_list[-1][i:j])
-        field_list = field_list[:-2]
+        field_list = field_list[:-1]
     elif len(field_list) == 6:
         value_dict["event"] = "Death"
     elif len(field_list) == 7:
@@ -513,17 +538,19 @@ def parse_sa_list(clip):
         else:
             value_dict["event"] = "Marriage"
     else:
-        msg_text.set("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+        output_error("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+        value_dict["event"] = "Error"
+        return value_dict
         
     # Now store the columns into the respective dictionary items
     if value_dict["event"] == "Marriage":
         if field_list[0].find("(members only)") > 0:
-            value_dict["groom family"] = '(members only)'
+            value_dict["groom family"] = ""
         else:    
             value_dict["groom family"] = field_list[0]
         value_dict["groom given"] = field_list[1]
         if field_list[2].find("(members only)") > 0:
-            value_dict["bride family"] = '(members only)'
+            value_dict["bride family"] = ""
         else:    
             value_dict["bride family"] = field_list[2]
         value_dict["bride given"] = field_list[3]
@@ -544,6 +571,10 @@ def parse_sa_detail(clip):
     field_list = []
     # parse the detail output
     i = clip.find('<span class="gsa_field_name')
+    if i == -1:
+        output_error("Not a valid SA Detail clip - gsa fields missing")
+        value_dict["event"] = "Error"
+        return value_dict
     while i != -1:
         i = clip.find('>', i)
         j = clip.find('</span>', i)
@@ -619,7 +650,9 @@ def parse_sa_detail(clip):
                 value_dict["event"] = "Death"
                 value_dict["year"] = field_value
         i = clip.find('<span class="gsa_field_name', j)
-           
+    if value_dict["event"] == "":
+        output_error("SA detail clip incomplete - Birth/Death/Marriage year missing")
+        value_dict["event"] = "Error"
     return value_dict
 
 def parse_sa_html(clip):
@@ -627,8 +660,15 @@ def parse_sa_html(clip):
         return parse_sa_list(clip)
     elif clip.find('<div class="gsa_userdetail') > 0:
         return parse_sa_detail(clip)
+    elif clip.find('<div class="gsa_row') > 0:
+        value_dict = init_value_dict()
+        output_error("SA detail clip incomplete, please copy all rows")
+        value_dict["event"] = "Error"
     else:
-        return "Not a valid SA clip."
+        value_dict = init_value_dict()
+        output_error("Not a valid SA clip.")
+        value_dict["event"] = "Error"
+        return value_dict
 
 def parse_wa_html(clip):
     value_dict = init_value_dict()
@@ -636,6 +676,14 @@ def parse_wa_html(clip):
     # Find strings bounded by <td ...> </td>
     # The opening td contains an attribute with prefix cdk-column- that indicates the data type
     i = clip.find("<td")
+    if i == -1:
+        output_error("Not a valid WA clip - no table entries found")
+        value_dict["event"] = "Error"
+        return value_dict
+    if clip.find("cdk-") == -1:
+        output_error("Not a valid WA clip - cannot find field identifiers")
+        value_dict["event"] = "Error"
+        return value_dict
     while i != -1:
         i = clip.find("cdk-column-", i) + len("cdk-column-")
         j = clip.find(" ", i)
@@ -688,39 +736,31 @@ def parse_wa_html(clip):
 # handlers for the generate buttons
 def gen_nsw_birth():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_nsw_html(str(clip))
-    # print(value_dict)
-    output_format(nsw_ref, nsw_url, value_dict, birth_format)
+    if value_dict["event"] != "Error":
+        output_format(nsw_ref, nsw_url, value_dict, birth_format)
 
 def gen_nsw_death():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_nsw_html(str(clip))
-    # print(value_dict)
-    output_format(nsw_ref, nsw_url, value_dict, death_format)
+    if value_dict["event"] != "Error":
+        output_format(nsw_ref, nsw_url, value_dict, death_format)
 
 def gen_nsw_marriage():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_nsw_html(str(clip))
-    # print(value_dict)
-    output_format(nsw_ref, nsw_url, value_dict, marriage_format)
+    if value_dict["event"] != "Error":
+        output_format(nsw_ref, nsw_url, value_dict, marriage_format)
 
 def gen_vic():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_vic_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -729,16 +769,13 @@ def gen_vic():
         output_format(vic_ref, vic_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
         output_format(vic_ref, vic_url, value_dict, marriage_format)
-    else:
-        msg_text.set("Unexpected event type: " + value_dict["event"])
-        output_text.set("")
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
     return
 
 def gen_qld():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_qld_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -747,16 +784,13 @@ def gen_qld():
         output_format(qld_ref, value_dict["url"], value_dict, death_format)
     elif value_dict["event"] == "Marriage":
         output_format(qld_ref, value_dict["url"], value_dict, marriage_format)
-    else:
-        msg_text.set("Unexpected event type: " + value_dict["event"])
-        output_text.set("")
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
     return
 
 def gen_sa():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_sa_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -765,18 +799,13 @@ def gen_sa():
         output_format(sa_ref, sa_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
         output_format(sa_ref, sa_url, value_dict, marriage_format)
-    elif value_dict["event"] != "":
-        msg_text.set("Unexpected event type: " + value_dict["event"])
-        output_text.set("")
-    else:
-        output_text.set("")
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
     return
 
 def gen_wa():
     clip = get_html()
-    if clip == None:
-        msg_text.set("Unable to read HTML clipboard")
-        output_text.set("")
+    if clip == "":
         return
     value_dict = parse_wa_html(clip.decode('utf-8'))
     if value_dict["event"] == "Birth":
@@ -785,9 +814,8 @@ def gen_wa():
         output_format(wa_ref, wa_url, value_dict, death_format)
     elif value_dict["event"] == "Marriage":
         output_format(wa_ref, wa_url, value_dict, marriage_format)
-    else:
-        msg_text.set("Unexpected event type: " + value_dict["event"])
-        output_text.set("")
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
     return
 
 def open_nsw_web():
@@ -927,7 +955,7 @@ tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=1, column=0, padx=
 tk.Button(wa_frame, text="Open BDM Website", command=open_wa_web, width=20).grid(row=2, column=0, padx=5)
 
 # output area (optional - mostly for debug, but it does allow you to check the result before pasting it)
-output_box = tk.Label(root, textvariable=output_text, width=70, height=5, wrap=490, justify="left", anchor="nw", relief="sunken")
+output_box = tk.Label(root, textvariable=output_text, width=70, height=7, font=("", 12), wrap=600, justify="left", anchor="nw", relief="sunken")
 output_box.grid(row=5, column=0, padx=2, pady=2)
 
 root.mainloop()
