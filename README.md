@@ -6,12 +6,25 @@ For South Australia it will need to use the Genealogy SA webite data, if possibl
 
 ## Prerequisites
 
-To be able to run this you need to have Python 3 installed.  
+To be able to run this you need to have Python 3, and the pywin32 package for Python installed.  
 It was developed on Python version 3.8
+
+### Installing Python on Windows
+
+You can obtain the latest version of Python from the Microsoft store. It is a free app.
+
+The latest version at the time of writing is Python 3.10
+Simply click on the latest version (highest number) and then click the Get button.
+
+Version 3.11 is there in Beta form but I would recommend that you stick to the non-beta releases unless you are feeling adventurous!
+
+### pywin32 package
 
 You will also need to have the pywin32 package installed to enable the clipboard handling functionality.
 It can be installed by running the following command in a Windows Command prompt:
 	pip install pywin32
+	
+A batch file (install_pywin32.bat) is provided to run this command but it may run foul of some anti-virus software.
 	
 More detailed installation instructions can be found at:  
 https://www.geeksforgeeks.org/how-to-install-pywin32-on-windows/
