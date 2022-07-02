@@ -1,6 +1,6 @@
 # NSW BDM Reference Generator for Wikitree
 __author__ = "Mike Young"
-__Version__ = "2.6"
+__Version__ = "2.7"
 
 #
 import tkinter as tk
@@ -186,8 +186,6 @@ def output_reference(out):
     output_text.set(out)
     root.clipboard_clear()
     root.clipboard_append(out)
-    msg_text.set("Reference copied to clipboard")
-    msgbox["fg"] = "green"
 
 def output_var(state_ref, state_url, value_dict, var_list):
     var_key = var_list[1]
@@ -245,6 +243,8 @@ def output_format(state_ref, state_url, value_dict, format_list):
         elif format_entry[TYPE] == "var":
             output_text += output_var(state_ref, state_url, value_dict, format_entry[VALUE])
     output_reference(output_text)
+    msg_text.set("Reference copied to clipboard")
+    msgbox["fg"] = "green"
             
 def parse_format(format_text):
     txt = ""
@@ -544,12 +544,12 @@ def parse_sa_list(clip):
         
     # Now store the columns into the respective dictionary items
     if value_dict["event"] == "Marriage":
-        if field_list[0].find("(members only)") > 0:
+        if field_list[0].find("(members only)") >= 0:
             value_dict["groom family"] = ""
         else:    
             value_dict["groom family"] = field_list[0]
         value_dict["groom given"] = field_list[1]
-        if field_list[2].find("(members only)") > 0:
+        if field_list[2].find("(members only)") >= 0:
             value_dict["bride family"] = ""
         else:    
             value_dict["bride family"] = field_list[2]
@@ -583,87 +583,99 @@ def parse_sa_detail(clip):
         i = clip.find('>', i)
         j = clip.find('</span>', i)
         field_value = clip[i+1:j]
-        if field_value.find('(members only)') == -1:
-            if field_name == "Groom Surname:":
-                value_dict["groom family"] = field_value
-            elif field_name == "Groom Given Names:":
-                value_dict["groom given"] = field_value
-            elif field_name == "Bride Surname:":
-                value_dict["bride family"] = field_value
-            elif field_name == "Bride Given Names:":
-                value_dict["bride given"] = field_value
-            elif field_name == "Marriage Date:":
-                value_dict["date"] = field_value
-            elif field_name == "Marriage Place:":
-                value_dict["location"] = field_value
-            elif field_name == "Groom Age:":
-                value_dict["groom age"] = field_value
-            elif field_name == "Groom Marital Status:":
-                value_dict["groom status"] = field_value
-            elif field_name == "Groom Father:":
-                value_dict["groom father"] = field_value
-            elif field_name == "Bride Age:":
-                value_dict["bride age"] = field_value
-            elif field_name == "Bride Marital Status:":
-                value_dict["bride status"] = field_value
-            elif field_name == "Bride Father:":
-                value_dict["bride father"] = field_value
-            elif field_name == "Surname:":
-                value_dict["family name"] = field_value
-            elif field_name == "First Names:":
-                value_dict["given name"] = field_value
-            elif field_name == "Given Names:":
-                value_dict["given name"] = field_value
-            elif field_name == "Date of Birth:":
-                value_dict["date"] = field_value
-            elif field_name == "Gender:":
-                value_dict["gender"] = field_value
-            elif field_name == "Father:":
-                value_dict["father"] = field_value
-            elif field_name == "Mother:":
-                value_dict["mother"] = field_value
-            elif field_name == "Birth Residence:":
-                value_dict["location"] = field_value
-            elif field_name == "Death Date:":
-                value_dict["date"] = field_value
-            elif field_name == "Age:":
-                value_dict["age"] = field_value
-            elif field_name == "Marital Status:":
-                value_dict["marital status"] = field_value
-            elif field_name == "Relative:":
-                value_dict["relative"] = field_value
-            elif field_name == "Place of Death:":
-                value_dict["location death"] = field_value
-            elif field_name == "District:":
-                value_dict["district"] = field_value
-            elif field_name == "Book/Page:":
-                value_dict["reg no"] = field_value
-            elif field_name == "Notes:":
-                value_dict["notes"] = field_value
-            elif field_name == "Marriage Year:":
-                value_dict["event"] = "Marriage"
-                value_dict["year"] = field_value
-            elif field_name == "Birth Year:":
-                value_dict["event"] = "Birth"
-                value_dict["year"] = field_value
-            elif field_name == "Death Year:":
-                value_dict["event"] = "Death"
-                value_dict["year"] = field_value
+        if field_value.find("(members only)") >= 0:
+            field_value = ""
+        if field_name == "Groom Surname:":
+            value_dict["groom family"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Groom Given Names:":
+            value_dict["groom given"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Bride Surname:":
+            value_dict["bride family"] = field_value
+        elif field_name == "Bride Given Names:":
+            value_dict["event"] = "Marriage"
+            value_dict["bride given"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Marriage Date:":
+            value_dict["date"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Marriage Place:":
+            value_dict["location"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Groom Age:":
+            value_dict["groom age"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Groom Marital Status:":
+            value_dict["groom status"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Groom Father:":
+            value_dict["groom father"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Bride Age:":
+            value_dict["bride age"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Bride Marital Status:":
+            value_dict["bride status"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Bride Father:":
+            value_dict["bride father"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Surname:":
+            value_dict["family name"] = field_value
+        elif field_name == "First Names:":
+            value_dict["given name"] = field_value
+        elif field_name == "Given Names:":
+            value_dict["given name"] = field_value
+        elif field_name == "Date of Birth:":
+            value_dict["date"] = field_value
+        elif field_name == "Gender:":
+            value_dict["gender"] = field_value
+        elif field_name == "Father:":
+            value_dict["father"] = field_value
+        elif field_name == "Mother:":
+            value_dict["mother"] = field_value
+        elif field_name == "Birth Residence:":
+            value_dict["location"] = field_value
+            value_dict["event"] = "Birth"
+        elif field_name == "Death Date:":
+            value_dict["date"] = field_value
+            value_dict["event"] = "Death"
+        elif field_name == "Age:":
+            value_dict["age"] = field_value
+        elif field_name == "Marital Status:":
+            value_dict["marital status"] = field_value
+        elif field_name == "Relative:":
+            value_dict["relative"] = field_value
+        elif field_name == "Place of Death:":
+            value_dict["location death"] = field_value
+            value_dict["event"] = "Death"
+        elif field_name == "District:":
+            value_dict["district"] = field_value
+        elif field_name == "Book/Page:":
+            value_dict["reg no"] = field_value
+        elif field_name == "Notes:":
+            value_dict["notes"] = field_value
+        elif field_name == "Marriage Year:":
+            value_dict["year"] = field_value
+            value_dict["event"] = "Marriage"
+        elif field_name == "Birth Year:":
+            value_dict["year"] = field_value
+            value_dict["event"] = "Birth"
+        elif field_name == "Death Year:":
+            value_dict["year"] = field_value
+            value_dict["event"] = "Death"
         i = clip.find('<span class="gsa_field_name', j)
     if value_dict["event"] == "":
-        output_error("SA detail clip incomplete - Birth/Death/Marriage year missing")
+        output_error("Unable to determine event type - no event-specific field found")
         value_dict["event"] = "Error"
     return value_dict
 
 def parse_sa_html(clip):
     if clip.find("<table") > 0:
         return parse_sa_list(clip)
-    elif clip.find('<div class="gsa_userdetail') > 0:
+    elif clip.find('<div class="gsa') > 0:
         return parse_sa_detail(clip)
-    elif clip.find('<div class="gsa_row') > 0:
-        value_dict = init_value_dict()
-        output_error("SA detail clip incomplete, please copy all rows")
-        value_dict["event"] = "Error"
     else:
         value_dict = init_value_dict()
         output_error("Not a valid SA clip.")
@@ -741,6 +753,8 @@ def gen_nsw_birth():
     value_dict = parse_nsw_html(str(clip))
     if value_dict["event"] != "Error":
         output_format(nsw_ref, nsw_url, value_dict, birth_format)
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
 
 def gen_nsw_death():
     clip = get_html()
@@ -749,6 +763,8 @@ def gen_nsw_death():
     value_dict = parse_nsw_html(str(clip))
     if value_dict["event"] != "Error":
         output_format(nsw_ref, nsw_url, value_dict, death_format)
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
 
 def gen_nsw_marriage():
     clip = get_html()
@@ -757,6 +773,8 @@ def gen_nsw_marriage():
     value_dict = parse_nsw_html(str(clip))
     if value_dict["event"] != "Error":
         output_format(nsw_ref, nsw_url, value_dict, marriage_format)
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
 
 def gen_vic():
     clip = get_html()
@@ -771,6 +789,8 @@ def gen_vic():
         output_format(vic_ref, vic_url, value_dict, marriage_format)
     elif value_dict["event"] != "Error":
         output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
     return
 
 def gen_qld():
@@ -786,6 +806,8 @@ def gen_qld():
         output_format(qld_ref, value_dict["url"], value_dict, marriage_format)
     elif value_dict["event"] != "Error":
         output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
     return
 
 def gen_sa():
@@ -801,6 +823,8 @@ def gen_sa():
         output_format(sa_ref, sa_url, value_dict, marriage_format)
     elif value_dict["event"] != "Error":
         output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
     return
 
 def gen_wa():
@@ -816,6 +840,8 @@ def gen_wa():
         output_format(wa_ref, wa_url, value_dict, marriage_format)
     elif value_dict["event"] != "Error":
         output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
     return
 
 def open_nsw_web():

@@ -52,6 +52,10 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Version History
 
+### Version 2.7
+* Update SA processing to allow for differences to detail page when logged in as member
+* Bugfix - remove checking for incomplete detail clip as that only works in Firefox (you now just get however much you copy)
+
 ### Version 2.6
 * Increase the size of the output box from 5 rows to 7 rows and enlarge the font to 12pt
 * Improve handling of errors like not copying enough of the row or selecting the wrong state
