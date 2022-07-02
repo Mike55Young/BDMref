@@ -530,40 +530,65 @@ def parse_sa_list(clip):
         j = field_list[-1].find("&", i)
         value_dict["event"] = string.capwords(field_list[-1][i:j])
         field_list = field_list[:-1]
-    elif len(field_list) == 6:
-        value_dict["event"] = "Death"
-    elif len(field_list) == 7:
-        if field_list[2] == 'M' or field_list[2] == 'F':
-            value_dict["event"] = "Birth"
-        else:
-            value_dict["event"] = "Marriage"
+    if field_list[-2].find("/") >=0:
+        logged_in = False
+    elif field_list[-1].find("/") >= 0:
+        logged_in = True
     else:
-        output_error("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+        output_error("Book/Page not in expected position")
         value_dict["event"] = "Error"
         return value_dict
+    if logged_in:
+        if len(field_list) == 7:
+            value_dict["event"] = "Death"
+        elif len(field_list) == 8:
+            if field_list[4] == 'M' or field_list[4] == 'F':
+                value_dict["event"] = "Birth"
+            else:
+                value_dict["event"] = "Marriage"
+        else:
+            output_error("Should be 7 or 8 columns (excluding View Details) but found " + str(len(field_list)))
+            value_dict["event"] = "Error"
+            return value_dict
+    else:
+        if len(field_list) == 6:
+            value_dict["event"] = "Death"
+        elif len(field_list) == 7:
+            if field_list[2] == 'M' or field_list[2] == 'F':
+                value_dict["event"] = "Birth"
+            else:
+                value_dict["event"] = "Marriage"
+        else:
+            output_error("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+            value_dict["event"] = "Error"
+            return value_dict
         
     # Now store the columns into the respective dictionary items
-    if value_dict["event"] == "Marriage":
-        if field_list[0].find("(members only)") >= 0:
-            value_dict["groom family"] = ""
-        else:    
-            value_dict["groom family"] = field_list[0]
-        value_dict["groom given"] = field_list[1]
-        if field_list[2].find("(members only)") >= 0:
-            value_dict["bride family"] = ""
-        else:    
-            value_dict["bride family"] = field_list[2]
-        value_dict["bride given"] = field_list[3]
+    if logged_in:
+        output_error("Sorry, list not yet supported when logged in - use details")
+        value_dict["event"] = "Error"
     else:
-        value_dict["family name"] = field_list[0]
-        value_dict["given name"] = field_list[1]
-        value_dict["gender"] = field_list[2]
-        if value_dict["event"] == "Birth":
-            value_dict["father"] = field_list[3]
-    # Last 3 are always district, book/page and year
-    value_dict["district"] = field_list[-3]
-    value_dict["reg no"] = field_list[-2]
-    value_dict["year"] = field_list[-1]
+        if value_dict["event"] == "Marriage":
+            if field_list[0].find("(members only)") >= 0:
+                value_dict["groom family"] = ""
+            else:    
+                value_dict["groom family"] = field_list[0]
+            value_dict["groom given"] = field_list[1]
+            if field_list[2].find("(members only)") >= 0:
+                value_dict["bride family"] = ""
+            else:    
+                value_dict["bride family"] = field_list[2]
+            value_dict["bride given"] = field_list[3]
+        else:
+            value_dict["family name"] = field_list[0]
+            value_dict["given name"] = field_list[1]
+            value_dict["gender"] = field_list[2]
+            if value_dict["event"] == "Birth":
+                value_dict["father"] = field_list[3]
+        # Last 3 are always district, book/page and year
+        value_dict["district"] = field_list[-3]
+        value_dict["reg no"] = field_list[-2]
+        value_dict["year"] = field_list[-1]
     return value_dict
 
 def parse_sa_detail(clip):
