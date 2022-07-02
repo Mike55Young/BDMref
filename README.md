@@ -53,7 +53,7 @@ The format file is used to define the layout of the generated citation. Details 
 ## Version History
 
 ### Version 2.7
-* Update SA processing to allow for differences to detail page when logged in as member
+* Update SA processing to allow for differences when logged in as member
 * Bugfix - remove checking for incomplete detail clip as that only works in Firefox (you now just get however much you copy)
 
 ### Version 2.6
