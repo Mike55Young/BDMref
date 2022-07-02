@@ -565,9 +565,33 @@ def parse_sa_list(clip):
         
     # Now store the columns into the respective dictionary items
     if logged_in:
-        output_error("Sorry, list not yet supported when logged in - use details")
-        value_dict["event"] = "Error"
+        if value_dict["event"] == "Birth":
+            value_dict["family name"] = field_list[0]
+            value_dict["given name"] = field_list[1]
+            value_dict["date"] = field_list[2]
+            value_dict["gender"] = field_list[3]
+            value_dict["father"] = field_list[4]
+        elif value_dict["event"] == "Death":
+            value_dict["family name"] = field_list[0]
+            value_dict["given name"] = field_list[1]
+            value_dict["date"] = field_list[2]
+            value_dict["age"] = field_list[3]
+            value_dict["gender"] = field_list[4]
+            value_dict["relative"] = field_list[5]
+        elif value_dict["event"] == "Marriage":
+            value_dict["groom family"] = field_list[0]
+            value_dict["groom given"] = field_list[1]
+            value_dict["bride family"] = field_list[2]
+            value_dict["bride given"] = field_list[3]
+            value_dict["date"] = field_list[4]
+        else:
+            output_error("Sorry, list not working properly - use details")
+            value_dict["event"] = "Error"
+        # Last 2 are always district, book/page
+        value_dict["district"] = field_list[-2]
+        value_dict["reg no"] = field_list[-1]
     else:
+        # Not logged in - fields are a bit different
         if value_dict["event"] == "Marriage":
             if field_list[0].find("(members only)") >= 0:
                 value_dict["groom family"] = ""
