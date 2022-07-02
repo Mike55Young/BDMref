@@ -538,7 +538,7 @@ def parse_sa_list(clip):
         output_error("Book/Page not in expected position")
         value_dict["event"] = "Error"
         return value_dict
-    if value_dict["Event"] == "":
+    if value_dict["event"] == "":
         if logged_in:
             if len(field_list) == 8:
                 value_dict["event"] = "Death"
@@ -548,7 +548,7 @@ def parse_sa_list(clip):
                 else:
                     value_dict["event"] = "Marriage"
             else:
-                output_error("Should be 7 or 8 columns (excluding View Details) but found " + str(len(field_list)))
+                output_error("Should be 8 or 9 columns (excluding View Details) but found " + str(len(field_list)))
                 value_dict["event"] = "Error"
                 return value_dict
         else:
