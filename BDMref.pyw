@@ -538,30 +538,31 @@ def parse_sa_list(clip):
         output_error("Book/Page not in expected position")
         value_dict["event"] = "Error"
         return value_dict
-    if logged_in:
-        if len(field_list) == 7:
-            value_dict["event"] = "Death"
-        elif len(field_list) == 8:
-            if field_list[4] == 'M' or field_list[4] == 'F':
-                value_dict["event"] = "Birth"
+    if value_dict["Event"] == "":
+        if logged_in:
+            if len(field_list) == 8:
+                value_dict["event"] = "Death"
+            elif len(field_list) == 9:
+                if field_list[3] == 'M' or field_list[3] == 'F':
+                    value_dict["event"] = "Birth"
+                else:
+                    value_dict["event"] = "Marriage"
             else:
-                value_dict["event"] = "Marriage"
+                output_error("Should be 7 or 8 columns (excluding View Details) but found " + str(len(field_list)))
+                value_dict["event"] = "Error"
+                return value_dict
         else:
-            output_error("Should be 7 or 8 columns (excluding View Details) but found " + str(len(field_list)))
-            value_dict["event"] = "Error"
-            return value_dict
-    else:
-        if len(field_list) == 6:
-            value_dict["event"] = "Death"
-        elif len(field_list) == 7:
-            if field_list[2] == 'M' or field_list[2] == 'F':
-                value_dict["event"] = "Birth"
+            if len(field_list) == 6:
+                value_dict["event"] = "Death"
+            elif len(field_list) == 7:
+                if field_list[2] == 'M' or field_list[2] == 'F':
+                    value_dict["event"] = "Birth"
+                else:
+                    value_dict["event"] = "Marriage"
             else:
-                value_dict["event"] = "Marriage"
-        else:
-            output_error("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
-            value_dict["event"] = "Error"
-            return value_dict
+                output_error("Should be 6 or 7 columns (excluding View Details) but found " + str(len(field_list)))
+                value_dict["event"] = "Error"
+                return value_dict
         
     # Now store the columns into the respective dictionary items
     if logged_in:
@@ -571,6 +572,8 @@ def parse_sa_list(clip):
             value_dict["date"] = field_list[2]
             value_dict["gender"] = field_list[3]
             value_dict["father"] = field_list[4]
+            value_dict["mother"] = field_list[5]
+            value_dict["location"] = field_list[6]
         elif value_dict["event"] == "Death":
             value_dict["family name"] = field_list[0]
             value_dict["given name"] = field_list[1]
@@ -584,6 +587,8 @@ def parse_sa_list(clip):
             value_dict["bride family"] = field_list[2]
             value_dict["bride given"] = field_list[3]
             value_dict["date"] = field_list[4]
+            value_dict["groom father"] = field_list[5]
+            value_dict["bride father"] = field_list[6]
         else:
             output_error("Sorry, list not working properly - use details")
             value_dict["event"] = "Error"
