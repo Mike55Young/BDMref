@@ -54,6 +54,8 @@ The format file is used to define the layout of the generated citation. Details 
 
 ### Format.ini
 
+Data from the website (apart from surnames) is converted to mixed case.
+
 **New South Wales**  
 New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>
 SMITH James B F, Father: David L, Mother: Caroline M, District: Balmain North
@@ -76,6 +78,8 @@ James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
 
 ### Format_asis.ini
 
+Data from the website is output as it appears on the website.
+
 **New South Wales**  
 New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>
 SMITH JAMES B F, Father: DAVID L, Mother: CAROLINE M, District: BALMAIN NORTH
@@ -95,6 +99,26 @@ James Smith, Spouse: Caroline Kahl, Date: 13/12/1900
 
 Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022) Death registration # 1900/C/4145<br/>
 James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
+
+### Format_RG.ini
+
+Data from the website is output as it appears on the website. Fields are individually labelled and delimited by parentheses.  
+This format is included as an example of what can be done with output formatting.
+
+**New South Wales**  
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022)<br/>(Surname: SMITH); (Given Names: JAMES B F); (Father: DAVID L); (Mother: CAROLINE M); (District: BALMAIN NORTH); (Reg no: 29358/1900)
+
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022)<br/>(Groom Surname: SMITH); (Groom Given Names: JAMES R)
+
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022)<br/>(Surname: SMITH); (Given Names: JAMES); (Father: JOHN); (Mother: NANCY); (District: GRANVILLE); (Reg no: 8983/1900)
+
+**Queensland**  
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 15 Jul 2022)<br/>(Name: James Smith); (Mother: Ada Emma Rensley  Jewell); (Father/parent: Thomas); (Reg no: 1900/C/8586); (Birth year: 15/07/1900)
+
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 15 Jul 2022)<br/>(Name: James Smith); (Spouse: Caroline Kahl)
+
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022)<br/>(Name: James Smith); (Mother: Lucy Fleming); (Father/parent: Thomas Smith); (Reg no: 1900/C/4145); (Death year: 30/08/1900)
+
 
 ## Version History
 
