@@ -55,11 +55,11 @@ The format file is used to define the layout of the generated citation. Details 
 ### Format.ini
 
 New South Wales  
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>  
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900  
 SMITH James B F, Father: David L, Mother: Caroline M, District: Balmain North  
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900<br/>  
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900  
 Groom: SMITH James R, Bride: HEALEY Jane, District: Carcoar  
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>  
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>
 SMITH James, Father: John, Mother: Nancy, District: Granville
 
 Queensland  
