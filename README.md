@@ -1,8 +1,9 @@
 # BDMref
 
 This program reformats the output of Australian Births Deaths and Marriages websites as references for Genealogy websites like WikiTree.
-At present it supports NSW, Queensland, Victoria, and Western Australia. It is designed to be expanded to cover other states.
-For South Australia it will need to use the Genealogy SA webite data, if possible.
+At present it supports NSW, Queensland, Victoria, South Australia and Western Australia.
+It is designed to be expanded to cover other states as they become available.
+For South Australia it uses the Genealogy SA webite data, either from the list or the details page.
 
 ## Prerequisites
 
