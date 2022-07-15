@@ -69,7 +69,7 @@ The format file is used to define the layout of the generated citation. Details 
 
 ### Version 2.4
 * Bugfix. Program would crash if father's given name was missing on the Victorian website
-* Bugfix. Remove stray "\" from found before apostrophes on the NSW website (e.g. O\Keefe)
+* Bugfix. Remove stray "\\" from before apostrophes on the NSW website (e.g. O\Keefe)
 * Updates to output format files:
 *   Make gender field in output format more obvious by prefixing with "Gender: "
 *   Output mother's birth surname (Vic only) in parentheses after her name at the birth/death e.g. O'Keefe, Mary (FARRELL)
