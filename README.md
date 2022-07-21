@@ -123,6 +123,11 @@ Queensland family history research service (https://www.familyhistory.bdm.qld.go
 
 ## Version History
 
+### Version 2.8
+* Add code to translate NSW two letter church record codes, and interpret the Queensland registration codes
+* New output variables "location text" and "state" to allow the output of a basic biography entry along with an inline reference
+* New Format samples: Format_ref.ini - output an inline reference; Format_bio.ini - output bio section plus inline reference
+
 ### Version 2.7
 * Update SA processing to allow for differences when logged in as member
 * Bugfix - remove checking for incomplete detail clip as that only works in Firefox (you now just get however much you copy)
