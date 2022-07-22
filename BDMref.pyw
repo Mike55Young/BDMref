@@ -879,24 +879,40 @@ def parse_qld_html(clip):
         if k > 0:
             if k < i or i == -1:
                 i = k
-    loc_code = value_dict["reg no"][-6]
-    addendum = ""
-    # Queensland records are divided into two areas, B = Brisbane and C = Country
-    if loc_code == "P" or loc_code == "U" or loc_code == "A":
-        loc_code = value_dict["reg no"][-9]
-        addendum = " (church record)"
-    elif loc_code == "O" or loc_code == "R":
-        loc_code = value_dict["reg no"][-7]
-    if loc_code == "B":
-        value_dict["location text"] = "Brisbane" + addendum
-    elif loc_code == "C" or loc_code == "/":
-        value_dict["location text"] = "country area" + addendum
-    elif loc_code == "M":
-        value_dict["location text"] = "sea"
-    elif loc_code == "F" or loc_code == "S":
-        value_dict["location text"] = "war"
-    else:
-        value_dict["location text"] = loc_code
+    # Extract the codes from the registration number and interpret them
+    if "/" in value_dict["reg no"]:
+        loc_code = value_dict["reg no"].split("/")[1]
+        addendum = ""
+        # Queensland records are divided into two areas, B = Brisbane and C = Country
+        # They also use "M" for marine, "F" and "S" for first and second world war deaths
+        # and a three letter code for church records
+        if len(loc_code) == 3:
+            loc_code = "C"
+            addendum = " (church record)"
+        elif len(loc_code) > 3:
+            loc_code = loc_code[0]
+            addendum = " (church record)"
+        elif len(loc_code) == 2:
+            if loc_code[1] == "M":
+                addendum = "Marine"
+            elif loc_code[1] =="O" or loc_code[1] == "R":
+                addendum = "Late registration"
+            loc_code = loc_code[0]
+
+        if loc_code == "B":
+            value_dict["location text"] = "Brisbane" + addendum
+        elif loc_code == "C" or loc_code == "/":
+            value_dict["location text"] = "country area" + addendum
+        elif loc_code == "M":
+            value_dict["location text"] = "sea"
+        elif loc_code == "O" or loc_code == "R":
+            addendum = "Late registration"
+            value_dict["location text"] = "country area" + addendum
+        elif loc_code == "F" or loc_code == "S":
+            value_dict["location text"] = "war"
+        else:
+            value_dict["location text"] = loc_code
+
     return value_dict
  
 def parse_sa_list(clip):
