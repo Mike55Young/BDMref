@@ -680,6 +680,9 @@ def init_value_dict(s):
                   "relative": "",
                   "marital status": "",
                   "death spouse": "",
+                  "first name": "",
+                  "date text": "",
+                  "year text": "",
                   "location text": "",
                   "state": s
                   }
@@ -711,6 +714,13 @@ def get_key(s):
     wpath = s.split('"')[1]
     return wpath.split('_')[-1]
 
+# Get the first given name from the set of given names
+def get_first(names):
+    if " " in names:
+        return names.split(" ")[0]
+    else:
+        return names
+
 def parse_nsw_html(clip):
     item_num = ""
     item_year = ""
@@ -732,10 +742,12 @@ def parse_nsw_html(clip):
             value_dict["family name"] = tag_value
         elif tag_name == "subjectGivenName":
             value_dict["given name"] = tag_value
+            value_dict["first name"] = get_first(tag_value)
         elif tag_name == "itemNum":
             item_num = tag_value
         elif tag_name == "itemYear":
             item_year = tag_value
+            value_dict["year text"] = tag_value
         elif tag_name == "indexRef":
             item_ref = tag_value
         elif tag_name == "fatherName":
@@ -816,6 +828,7 @@ def parse_vic_html(clip):
     # Now store the columns into the respective dictionary items
     value_dict["family name"] = field_list[0]
     value_dict["given name"] = field_list[1]
+    value_dict["first name"] = get_first(field_list[1])
     value_dict["event"] = field_list[2]
     if value_dict["event"] == "Marriage":
         parse_vic_name(field_list[3], "spouse", value_dict)
@@ -828,6 +841,7 @@ def parse_vic_html(clip):
     parse_vic_name(field_list[8], "death spouse", value_dict)
     value_dict["age"] = field_list[9]
     value_dict["date"] = field_list[10]
+    value_dict["year text"] = field_list[10]
     value_dict["reg no"] = field_list[11]
     if value_dict["event"] == "Death" and value_dict["location death"] != "":
         value_dict["location text"] = value_dict["location death"]
@@ -851,6 +865,7 @@ def parse_qld_html(clip):
     i = clip.find(">", j)
     j = clip.find("<", i)
     value_dict["name"] = clip[i + 1:j].strip()
+    value_dict["first name"] = get_first(value_dict["name"])
     i = clip.find("<br", j)
     while i != -1:
         i = clip.find(">", i) + 1
@@ -860,6 +875,7 @@ def parse_qld_html(clip):
             field_type, field_value = clip[i:j].strip().split(":")
             if field_type == "Event date":
                 value_dict["date"] = field_value.strip()
+                value_dict["date text"] = value_dict["date"]
             elif field_type == "Event type":
                 value_dict["event"] = field_value.strip().split(" ")[0]
             elif field_type == "Registration details":
@@ -975,7 +991,9 @@ def parse_sa_list(clip):
         if value_dict["event"] == "Birth":
             value_dict["family name"] = field_list[0]
             value_dict["given name"] = field_list[1]
+            value_dict["first name"] = get_first(field_list[1])
             value_dict["date"] = field_list[2]
+            value_dict["date text"] = field_list[2]
             value_dict["gender"] = field_list[3]
             value_dict["father"] = field_list[4]
             value_dict["mother"] = field_list[5]
@@ -984,7 +1002,9 @@ def parse_sa_list(clip):
         elif value_dict["event"] == "Death":
             value_dict["family name"] = field_list[0]
             value_dict["given name"] = field_list[1]
+            value_dict["first name"] = get_first(field_list[1])
             value_dict["date"] = field_list[2]
+            value_dict["date text"] = field_list[2]
             value_dict["age"] = field_list[3]
             value_dict["gender"] = field_list[4]
             value_dict["relative"] = field_list[5]
@@ -994,6 +1014,7 @@ def parse_sa_list(clip):
             value_dict["bride family"] = field_list[2]
             value_dict["bride given"] = field_list[3]
             value_dict["date"] = field_list[4]
+            value_dict["date text"] = field_list[4]
             value_dict["groom father"] = field_list[5]
             value_dict["bride father"] = field_list[6]
         else:
@@ -1018,6 +1039,7 @@ def parse_sa_list(clip):
         else:
             value_dict["family name"] = field_list[0]
             value_dict["given name"] = field_list[1]
+            value_dict["first name"] = get_first(field_list[1])
             value_dict["gender"] = field_list[2]
             if value_dict["event"] == "Birth":
                 value_dict["father"] = field_list[3]
@@ -1025,6 +1047,7 @@ def parse_sa_list(clip):
         value_dict["district"] = field_list[-3]
         value_dict["reg no"] = field_list[-2]
         value_dict["year"] = field_list[-1]
+        value_dict["year text"] = field_list[-1]
     return value_dict
 
 def parse_sa_detail(clip):
@@ -1087,8 +1110,10 @@ def parse_sa_detail(clip):
             value_dict["family name"] = field_value
         elif field_name == "First Names:":
             value_dict["given name"] = field_value
+            value_dict["first name"] = get_first(field_value)
         elif field_name == "Given Names:":
             value_dict["given name"] = field_value
+            value_dict["first name"] = get_first(field_value)
         elif field_name == "Date of Birth:":
             value_dict["date"] = field_value
         elif field_name == "Gender:":
@@ -1133,6 +1158,12 @@ def parse_sa_detail(clip):
     if value_dict["event"] == "":
         output_error("Unable to determine event type - no event-specific field found")
         value_dict["event"] = "Error"
+    if value_dict["date"] != "":
+        # if we have a date, set as date text
+        value_dict["date text"] = value_dict["date"]
+    else:
+        # otherwise just set the year text
+        value_dict["year text"] = value_dict["year"]
     return value_dict
 
 def parse_sa_html(clip):
@@ -1175,6 +1206,7 @@ def parse_wa_html(clip):
             value_dict["family name"] = field_value
         elif field_type == "givenNames":
             value_dict["given name"] = field_value
+            value_dict["first name"] = get_first(field_value)
         elif field_type == "gender" or field_type == "gender01":
             value_dict["gender"] = field_value
         elif field_type == "father":
@@ -1195,6 +1227,7 @@ def parse_wa_html(clip):
             value_dict["event"] = "Marriage"
         elif field_type == "yearOfBirth" or field_type == "yearOfDeath" or field_type == "yearOfMarriage":
             value_dict["date"] = field_value
+            value_dict["year text"] = field_value
         elif field_type == "age":
             value_dict["age"] = field_value
         elif field_type == "spouseSurname":
@@ -1205,6 +1238,8 @@ def parse_wa_html(clip):
             value_dict["spouse gender"] = field_value
         elif field_type == "registrationDistrict":
             value_dict["district"] = field_value
+            if value_dict["location text"] == "":
+                value_dict["location text"] = field_value
         elif field_type == "registrationNumber":
             reg_no = field_value
         elif field_type == "registrationYear":
