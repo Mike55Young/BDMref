@@ -53,53 +53,61 @@ The format file is used to define the layout of the generated citation. Details 
 
 ## Sample Output
 
+### Format_bio.ini
+
+This is now set as the default output format.
+It generates a basic bio entry with an inline reference.
+Should you want the inline reference without the bio part, you can use Format_ref.ini (or just delete the bit you don't want).
+
+**New South Wales**  
+James was born in Balmain North, New South Wales, in 1900.<ref>New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 23 Jul 2022) Birth registration # 29358/1900<br/>SMITH James B F, Father: David L, Mother: Caroline M, District: Balmain North</ref>
+
+James R Smith married Jane Healey in Carcoar, New South Wales, in 1900.<ref>New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 23 Jul 2022) Marriage registration # 1024/1900<br/>Groom: SMITH James R, Bride: HEALEY Jane, District: Carcoar</ref>
+
+James died in Granville, New South Wales, in 1900.<ref>New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 23 Jul 2022) Death registration # 8983/1900<br/>SMITH James, Father: John, Mother: Nancy, District: Granville</ref>
+
+**Queensland**  
+James was born in Country Area, Queensland, on 15/07/1900.<ref>Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 23 Jul 2022) Birth registration # 1900/C/8586<br/>James Smith, Date: 15/07/1900, Mother: Ada Emma Rensley  Jewell, Father/parent: Thomas</ref>
+
+James married Caroline Kahl in Country Area, Queensland, on 13/12/1900.<ref>Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 23 Jul 2022) Marriage registration # 1900/C/2601<br/>James Smith, Spouse: Caroline Kahl, Date: 13/12/1900</ref>
+
+James died in Country Area, Queensland, on 30/08/1900.<ref>Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 23 Jul 2022) Death registration # 1900/C/4145<br/>James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith</ref>
+
 ### Format.ini
 
 Data from the website (apart from surnames) is converted to mixed case.
 
 **New South Wales**  
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>
-SMITH James B F, Father: David L, Mother: Caroline M, District: Balmain North
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>SMITH James B F, Father: David L, Mother: Caroline M, District: Balmain North
 
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900<br/>
-Groom: SMITH James R, Bride: HEALEY Jane, District: Carcoar
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900<br/>Groom: SMITH James R, Bride: HEALEY Jane, District: Carcoar
 
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>
-SMITH James, Father: John, Mother: Nancy, District: Granville
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>SMITH James, Father: John, Mother: Nancy, District: Granville
 
 **Queensland**  
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 15 Jul 2022) Birth registration # 1900/C/8586<br/>
-James Smith, Date: 15/07/1900, Mother: Ada Emma Rensley  Jewell, Father/parent: Thomas
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 15 Jul 2022) Birth registration # 1900/C/8586<br/>James Smith, Date: 15/07/1900, Mother: Ada Emma Rensley  Jewell, Father/parent: Thomas
 
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 15 Jul 2022) Marriage registration # 1900/C/2601<br/>
-James Smith, Spouse: Caroline Kahl, Date: 13/12/1900
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 15 Jul 2022) Marriage registration # 1900/C/2601<br/>James Smith, Spouse: Caroline Kahl, Date: 13/12/1900
 
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022) Death registration # 1900/C/4145<br/>
-James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022) Death registration # 1900/C/4145<br/>James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
 
 ### Format_asis.ini
 
 Data from the website is output as it appears on the website.
 
 **New South Wales**  
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>
-SMITH JAMES B F, Father: DAVID L, Mother: CAROLINE M, District: BALMAIN NORTH
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Birth registration # 29358/1900<br/>SMITH JAMES B F, Father: DAVID L, Mother: CAROLINE M, District: BALMAIN NORTH
 
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900<br/>
-Groom: JAMES R SMITH, Bride: JANE HEALEY, District: CARCOAR
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Marriage registration # 1024/1900<br/>Groom: JAMES R SMITH, Bride: JANE HEALEY, District: CARCOAR
 
-New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>
-SMITH JAMES, Father: JOHN, Mother: NANCY, District: GRANVILLE
+New South Wales Family History - Births, Deaths and Marriages Search (https://familyhistory.bdm.nsw.gov.au/lifelink/familyhistory/search : 15 Jul 2022) Death registration # 8983/1900<br/>SMITH JAMES, Father: JOHN, Mother: NANCY, District: GRANVILLE
 
 **Queensland**  
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 15 Jul 2022) Birth registration # 1900/C/8586<br/>
-James Smith, Date: 15/07/1900, Mother: Ada Emma Rensley  Jewell, Father/parent: Thomas
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/dd3c37c9f82a2e88a9db6ca7337570659f9724d159245325868da853f6bad64f : 15 Jul 2022) Birth registration # 1900/C/8586<br/>James Smith, Date: 15/07/1900, Mother: Ada Emma Rensley  Jewell, Father/parent: Thomas
 
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 15 Jul 2022) Marriage registration # 1900/C/2601<br/>
-James Smith, Spouse: Caroline Kahl, Date: 13/12/1900
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/b239ed528422d397ba0124c632918aa8df1601c16651f26269d9dd8012937bca : 15 Jul 2022) Marriage registration # 1900/C/2601<br/>James Smith, Spouse: Caroline Kahl, Date: 13/12/1900
 
-Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022) Death registration # 1900/C/4145<br/>
-James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
+Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022) Death registration # 1900/C/4145<br/>James Smith, Date: 30/08/1900, Mother: Lucy Fleming, Father/parent: Thomas Smith
 
 ### Format_RG.ini
 
@@ -125,7 +133,7 @@ Queensland family history research service (https://www.familyhistory.bdm.qld.go
 
 ### Version 2.8
 * Add code to translate NSW two letter church record codes, and interpret the Queensland registration codes
-* New output variables "location text" and "state" to allow the output of a basic biography entry along with an inline reference
+* New output variables "first name", "date text", "year text", "location text" and "state" to allow the output of a basic biography entry along with an inline reference
 * New Format samples: Format_ref.ini - output an inline reference; Format_bio.ini - output bio section plus inline reference
 
 ### Version 2.7
