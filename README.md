@@ -128,6 +128,18 @@ Queensland family history research service (https://www.familyhistory.bdm.qld.go
 
 Queensland family history research service (https://www.familyhistory.bdm.qld.gov.au/details/09b75c11c900df9106046ed5b8c5135366a4fb99cc9b952927a71303f453a3a6 : 15 Jul 2022)\<br/\>(Name: James Smith); (Mother: Lucy Fleming); (Father/parent: Thomas Smith); (Reg no: 1900/C/4145); (Death year: 30/08/1900)
 
+## License
+Distributed under GNU General Public License. See file LICENSE.
+
+## Contributing
+Project Link: https://github.com/Mike55Young/BDMref
+If you wish to make suggestions or report problems you have when using this program, please feel free to open an issue on github.
+You are also free to make your own version of the program (within the conditions of the GPL license) either on your own machine or in a Fork of the project on Github.
+
+If you create a format file you particularly like and would like to share, by all means do so. Please indicate whether you are willing for it to be included (with acknowledgement) in the main release.
+
+## Acknowledgements
+* Thanks to Ross Goonan for many helpful suggestions and finding really useful test cases.
 
 ## Version History
 
