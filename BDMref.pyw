@@ -1,4 +1,4 @@
-# NSW BDM Reference Generator for Wikitree
+# Australian BDM Reference Generator for Wikitree
 # Copyright (C) 2022 Mike Young
 
 # This program is free software: you can redistribute it and/or modify
