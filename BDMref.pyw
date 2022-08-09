@@ -664,6 +664,7 @@ def init_value_dict(s):
                   "gender": "",
                   "event": "",
                   "reg no": "",
+                  "reg year": "",
                   "father": "",
                   "mother": "",
                   "parent": "",
@@ -854,7 +855,7 @@ def parse_vic_html(clip):
     value_dict["location death"] = field_list[7]
     parse_vic_name(field_list[8], "death spouse", value_dict)
     value_dict["age"] = field_list[9]
-    value_dict["date"] = field_list[10]
+    value_dict["year"] = field_list[10]
     value_dict["year text"] = field_list[10]
     value_dict["reg no"] = field_list[11]
     if value_dict["event"] == "Death" and value_dict["location death"] != "":
@@ -1060,7 +1061,7 @@ def parse_sa_list(clip):
         # Last 3 are always district, book/page and year
         value_dict["district"] = field_list[-3]
         value_dict["reg no"] = field_list[-2]
-        value_dict["year"] = field_list[-1]
+        value_dict["reg year"] = field_list[-1]
         value_dict["year text"] = field_list[-1]
     return value_dict
 
@@ -1160,13 +1161,13 @@ def parse_sa_detail(clip):
         elif field_name == "Notes:":
             value_dict["notes"] = field_value
         elif field_name == "Marriage Year:":
-            value_dict["year"] = field_value
+            value_dict["reg year"] = field_value
             value_dict["event"] = "Marriage"
         elif field_name == "Birth Year:":
-            value_dict["year"] = field_value
+            value_dict["reg year"] = field_value
             value_dict["event"] = "Birth"
         elif field_name == "Death Year:":
-            value_dict["year"] = field_value
+            value_dict["reg year"] = field_value
             value_dict["event"] = "Death"
         i = clip.find('<span class="gsa_field_name', j)
     if value_dict["event"] == "":
@@ -1177,7 +1178,7 @@ def parse_sa_detail(clip):
         value_dict["date text"] = value_dict["date"]
     else:
         # otherwise just set the year text
-        value_dict["year text"] = value_dict["year"]
+        value_dict["year text"] = value_dict["reg year"]
     return value_dict
 
 def parse_sa_html(clip):
@@ -1193,6 +1194,7 @@ def parse_sa_html(clip):
     # if there is no better location information, use the district
     if value_dict["location text"] == "":
         value_dict["location text"] = value_dict["district"]
+    print(value_dict)
     return value_dict
 
 def parse_wa_html(clip):
@@ -1240,7 +1242,7 @@ def parse_wa_html(clip):
             value_dict["location text"] = field_value
             value_dict["event"] = "Marriage"
         elif field_type == "yearOfBirth" or field_type == "yearOfDeath" or field_type == "yearOfMarriage":
-            value_dict["date"] = field_value
+            value_dict["year"] = field_value
             value_dict["year text"] = field_value
         elif field_type == "age":
             value_dict["age"] = field_value
