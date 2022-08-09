@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __author__ = "Mike Young"
-__Version__ = "2.8"
+__Version__ = "2.9"
 
 #
 import tkinter as tk

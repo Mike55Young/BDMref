@@ -143,6 +143,11 @@ If you create a format file you particularly like and would like to share, by al
 
 ## Version History
 
+### Version 2.9
+* New variable "ref year" for SA records
+* "year" now used in place of "date" if only the year of the event is available.
+* Format files updated to match the variable changes.
+ 
 ### Version 2.8
 * Add code to translate NSW two letter church record codes, and interpret the Queensland registration codes
 * New output variables "first name", "date text", "year text", "location text" and "state" to allow the output of a basic biography entry along with an inline reference
