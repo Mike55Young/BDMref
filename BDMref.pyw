@@ -1154,6 +1154,10 @@ def parse_sa_detail(clip):
             value_dict["location death"] = field_value
             value_dict["location text"] = field_value
             value_dict["event"] = "Death"
+        elif field_name == "Residence:":
+            value_dict["location"] = field_value
+            if value_dict["location text"] == "":
+                value_dict["location text"] = field_value
         elif field_name == "District:":
             value_dict["district"] = field_value
         elif field_name == "Book/Page:":
@@ -1169,6 +1173,8 @@ def parse_sa_detail(clip):
         elif field_name == "Death Year:":
             value_dict["reg year"] = field_value
             value_dict["event"] = "Death"
+        else:
+            print("Unknown field: " + field_name)
         i = clip.find('<span class="gsa_field_name', j)
     if value_dict["event"] == "":
         output_error("Unable to determine event type - no event-specific field found")
