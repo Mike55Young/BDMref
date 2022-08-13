@@ -933,12 +933,11 @@ def parse_qld_html(clip):
         if loc_code == "B":
             value_dict["location text"] = "Brisbane" + addendum
         elif loc_code == "C" or loc_code == "/":
-            value_dict["location text"] = "country area" + addendum
+            value_dict["location text"] = addendum
         elif loc_code == "M":
             value_dict["location text"] = "sea"
         elif loc_code == "O" or loc_code == "R":
-            addendum = "Late registration"
-            value_dict["location text"] = "country area" + addendum
+            value_dict["location text"] = "Late registration"
         elif loc_code == "F" or loc_code == "S":
             value_dict["location text"] = "war"
         else:
