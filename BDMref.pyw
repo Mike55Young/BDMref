@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __author__ = "Mike Young"
-__Version__ = "2.9"
+__Version__ = "2.9.1"
 
 #
 import tkinter as tk
@@ -1479,37 +1479,37 @@ wa_button.grid(row=0, column=4, padx=5)
 # NSW frame
 nsw_frame = tk.Frame(root)
 tk.Label(nsw_frame, text="Copy a row on the browser, then click on the button below that corresponds to the entry type").grid(row=0, column=0, columnspan=3)
-tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=1, column=1, padx=5, pady=3)
-tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=1, column=2, padx=5, pady=3)
-tk.Button(nsw_frame, text="Open BDM Website", command=open_nsw_web, width=20).grid(row=2, column=0, columnspan=3, padx=5)
+tk.Button(nsw_frame, text="Open BDM Website", command=open_nsw_web, width=20).grid(row=1, column=0, columnspan=3, padx=5)
+tk.Button(nsw_frame, text="Birth", command=gen_nsw_birth, width=15).grid(row=2, column=0, padx=5, pady=3)
+tk.Button(nsw_frame, text="Death", command=gen_nsw_death, width=15).grid(row=2, column=1, padx=5, pady=3)
+tk.Button(nsw_frame, text="Marriage", command=gen_nsw_marriage, width=15).grid(row=2, column=2, padx=5, pady=3)
 
 # Qld frame
 qld_frame = tk.Frame(root)
 tk.Label(qld_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(qld_frame, text="Open BDM Website", command=open_qld_web, width=20).grid(row=2, column=0, padx=5)
+tk.Button(qld_frame, text="Open BDM Website", command=open_qld_web, width=20).grid(row=1, column=0, padx=5)
+tk.Button(qld_frame, text="Generate", command=gen_qld).grid(row=2, column=0, padx=5, pady=3)
 
 # Vic frame
 vic_frame = tk.Frame(root)
 tk.Label(vic_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(vic_frame, text="Open BDM Website", command=open_vic_web, width=20).grid(row=2, column=0, padx=5)
+tk.Button(vic_frame, text="Open BDM Website", command=open_vic_web, width=20).grid(row=1, column=0, padx=5)
+tk.Button(vic_frame, text="Generate", command=gen_vic).grid(row=2, column=0, padx=5, pady=3)
 
 # SA frame
 sa_frame = tk.Frame(root)
 tk.Label(sa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(sa_frame, text="Generate", command=gen_sa).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(sa_frame, text="Open BDM Website", command=open_sa_web, width=20).grid(row=2, column=0, padx=5)
+tk.Button(sa_frame, text="Open BDM Website", command=open_sa_web, width=20).grid(row=1, column=0, padx=5)
+tk.Button(sa_frame, text="Generate", command=gen_sa).grid(row=2, column=0, padx=5, pady=3)
 
 # WA frame
 wa_frame = tk.Frame(root)
 tk.Label(wa_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=1, column=0, padx=5, pady=3)
-tk.Button(wa_frame, text="Open BDM Website", command=open_wa_web, width=20).grid(row=2, column=0, padx=5)
+tk.Button(wa_frame, text="Open BDM Website", command=open_wa_web, width=20).grid(row=1, column=0, padx=5)
+tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=2, column=0, padx=5, pady=3)
 
 # output area (optional - mostly for debug, but it does allow you to check the result before pasting it)
-output_box = tk.Label(root, textvariable=output_text, width=70, height=7, font=("", 12), wrap=600, justify="left", anchor="nw", relief="sunken")
+output_box = tk.Label(root, textvariable=output_text, width=70, height=9, font=("", 12), wrap=600, justify="left", anchor="nw", relief="sunken")
 output_box.grid(row=5, column=0, padx=2, pady=2)
 
 root.mainloop()

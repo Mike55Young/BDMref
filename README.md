@@ -148,6 +148,8 @@ If you create a format file you particularly like and would like to share, by al
 * "year" now used in place of "date" if only the year of the event is available.
 * Format files updated to match the variable changes.
 * Bugfix - field "Residence:" now stored as location for SA death details clip.
+* Enlarge output area
+* Move the open website button above the generate button(s)
  
 ### Version 2.8
 * Add code to translate NSW two letter church record codes, and interpret the Queensland registration codes
