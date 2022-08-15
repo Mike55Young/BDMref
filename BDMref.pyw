@@ -1595,7 +1595,7 @@ vic_button.grid(row=0, column=3, padx=5)
 wa_button = tk.Button(button_frame, text="WA", command=wa_panel, width=8)
 wa_button.grid(row=0, column=4, padx=5)
 nz_button = tk.Button(button_frame, text="NZ", command=nz_panel, width=8)
-nz_button.grid(row=0, column=4, padx=5)
+nz_button.grid(row=0, column=5, padx=5)
 # other states will go here
 
 # NSW frame
