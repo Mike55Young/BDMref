@@ -143,6 +143,9 @@ If you create a format file you particularly like and would like to share, by al
 
 ## Version History
 
+### Version 3.0
+* Add NZ BDM
+
 ### Version 2.9
 * New variable "ref year" for SA records
 * "year" now used in place of "date" if only the year of the event is available.
