@@ -1575,7 +1575,7 @@ root.title("Wikitree BDM Reference Generator v" + __Version__)
 # common data
 output_text = tk.StringVar()
 msg_text = tk.StringVar()
-msg_text.set("Click on a state")
+msg_text.set("Select the BDM location")
 
 # Message area
 msgbox = tk.Label(root, textvariable=msg_text)
