@@ -1300,7 +1300,7 @@ def parse_wa_html(clip):
         value_dict["location text"] = value_dict["district"]
     return value_dict
 
-def parse_nz_html(clip):
+def parse_nz_html(clip, event_type):
     value_dict = init_value_dict("New Zealand")
     field_list = []
     # Find strings bounded by <td ...> </td>
@@ -1310,17 +1310,10 @@ def parse_nz_html(clip):
         output_error("Not a valid NZ clip - no table entries found")
         value_dict["event"] = "Error"
         return value_dict
-    if clip.find("width: ") == -1:
-        output_error("Not a valid NZ clip - no width specified")
-        value_dict["event"] = "Error"
-        return value_dict
     while i != -1:
-        i = clip.find("width: ", i) + 7
-        j = clip.find("%",i)
-        field_width = int(clip[i:j])
         i = clip.find(">", i)
         j = clip.find("</td>", i)
-        field_list.append([field_width, clip[i+1:j].strip()])
+        field_list.append(clip[i+1:j].strip())
         i = clip.find("<td", j)
 
     if len(field_list) < 4:
@@ -1328,48 +1321,38 @@ def parse_nz_html(clip):
         value_dict["event"] = "Error"
         return value_dict
     
-    if field_list[0][0] == 12:
-        value_dict["event"] = "Death"
-    elif field_list[1][0] == 18:
-        value_dict["event"] = "Birth"
-    elif field_list[1][0] == 20:
-        value_dict["event"] = "Marriage"
-    else:
-        output_error("Unexpected column width when detecting record type")
-        value_dict["event"] = "Error"
-        return value_dict
-
-    value_dict["reg no"] = field_list[0][1]
-    if value_dict["event"] == "Marriage":
+    value_dict["event"] = event_type
+    value_dict["reg no"] = field_list[0]
+    if event_type == "Marriage":
         if len(field_list) > 4:
-            value_dict["bride given"] = field_list[1][1]
-            value_dict["bride family"] = field_list[2][1]
-            value_dict["groom given"] = field_list[3][1]
-            value_dict["groom family"] = field_list[4][1]
+            value_dict["bride given"] = field_list[1]
+            value_dict["bride family"] = field_list[2]
+            value_dict["groom given"] = field_list[3]
+            value_dict["groom family"] = field_list[4]
         else:
             output_error("Need at least 5 columns for a marriage")
             value_dict["event"] = "Error"
             return value_dict
     else:
-        value_dict["family name"] = field_list[1][1]
-        value_dict["given name"] = field_list[2][1]
-        value_dict["first name"] = get_first(field_list[2][1])
-        if value_dict["event"] == "Birth":
+        value_dict["family name"] = field_list[1]
+        value_dict["given name"] = field_list[2]
+        value_dict["first name"] = get_first(field_list[2])
+        if event_type == "Birth":
             if len(field_list) > 4:
-                value_dict["mother"] = field_list[3][1]
-                value_dict["father"] = field_list[4][1]
+                value_dict["mother"] = field_list[3]
+                value_dict["father"] = field_list[4]
                 if len(field_list) > 5:
-                    if field_list[5][1] != "-":
-                        value_dict["notes"] = "Stillbirth: " + field_list[5][1]
+                    if field_list[5] != "-":
+                        value_dict["notes"] = "Stillbirth: " + field_list[5]
             else:
                 output_error("Need at least 5 columns for a birth")
                 value_dict["event"] = "Error"
                 return value_dict
         else:
-            if len(field_list[3][1]) < 5:
-                value_dict["age"] = field_list[3][1]
+            if len(field_list[3]) < 5:
+                value_dict["age"] = field_list[3]
             else:
-                value_dict["dob"] = field_list[3][1]
+                value_dict["dob"] = field_list[3]
 
     return value_dict
 
@@ -1472,16 +1455,38 @@ def gen_wa():
         output_reference(str(clip) + "\n" + str(value_dict))
     return
 
-def gen_nz():
+def gen_nz_birth():
     clip = get_html()
     if clip == "":
         return
-    value_dict = parse_nz_html(clip.decode('utf-8'))
+    value_dict = parse_nz_html(clip.decode('utf-8'), "Birth")
     if value_dict["event"] == "Birth":
         output_format(nz_ref, nz_url, value_dict, birth_format)
-    elif value_dict["event"] == "Death":
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
+    return
+
+def gen_nz_death():
+    clip = get_html()
+    if clip == "":
+        return
+    value_dict = parse_nz_html(clip.decode('utf-8'), "Death")
+    if value_dict["event"] == "Death":
         output_format(nz_ref, nz_url, value_dict, death_format)
-    elif value_dict["event"] == "Marriage":
+    elif value_dict["event"] != "Error":
+        output_error("Unexpected event type: " + value_dict["event"])
+    else:
+        output_reference(str(clip) + "\n" + str(value_dict))
+    return
+
+def gen_nz_marriage():
+    clip = get_html()
+    if clip == "":
+        return
+    value_dict = parse_nz_html(clip.decode('utf-8'), "Marriage")
+    if value_dict["event"] == "Marriage":
         output_format(nz_ref, nz_url, value_dict, marriage_format)
     elif value_dict["event"] != "Error":
         output_error("Unexpected event type: " + value_dict["event"])
@@ -1632,9 +1637,11 @@ tk.Button(wa_frame, text="Generate", command=gen_wa).grid(row=2, column=0, padx=
 
 # NZ frame
 nz_frame = tk.Frame(root)
-tk.Label(nz_frame, text="Copy a row on the browser, then click Generate").grid(row=0, column=0)
-tk.Button(nz_frame, text="Open BDM Website", command=open_nz_web, width=20).grid(row=1, column=0, padx=5)
-tk.Button(nz_frame, text="Generate", command=gen_nz).grid(row=2, column=0, padx=5, pady=3)
+tk.Label(nz_frame, text="Copy a row on the browser, then click on the button below that corresponds to the entry type").grid(row=0, column=0, columnspan=3)
+tk.Button(nz_frame, text="Open BDM Website", command=open_nz_web, width=20).grid(row=1, column=0, columnspan=3, padx=5)
+tk.Button(nz_frame, text="Birth", command=gen_nz_birth, width=15).grid(row=2, column=0, padx=5, pady=3)
+tk.Button(nz_frame, text="Death", command=gen_nz_death, width=15).grid(row=2, column=1, padx=5, pady=3)
+tk.Button(nz_frame, text="Marriage", command=gen_nz_marriage, width=15).grid(row=2, column=2, padx=5, pady=3)
 
 # output area (optional - mostly for debug, but it does allow you to check the result before pasting it)
 output_box = tk.Label(root, textvariable=output_text, width=70, height=9, font=("", 12), wrap=600, justify="left", anchor="nw", relief="sunken")
