@@ -139,9 +139,13 @@ You are also free to make your own version of the program (within the conditions
 If you create a format file you particularly like and would like to share, by all means do so. Please indicate whether you are willing for it to be included (with acknowledgement) in the main release.
 
 ## Acknowledgements
-* Thanks to Ross Goonan for many helpful suggestions and finding really useful test cases.
+* Thanks to Ross Goonan for many helpful suggestions, much testing, and finding really useful test cases.
 
 ## Version History
+
+### Version 3.1
+* Add table of NSW numerical district codes
+* Output church and numeric codes with the translated value appended in parentheses e.g. 001 (Sydney)
 
 ### Version 3.0
 * Add NZ BDM

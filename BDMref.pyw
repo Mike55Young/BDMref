@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __author__ = "Mike Young"
-__Version__ = "3.0"
+__Version__ = "3.1"
 
 #
 import tkinter as tk
@@ -392,6 +392,168 @@ church_codes = {"AA": ["Baptist", "Sydney, St Andrews"],
     "YF": ["Wesleyan Methodist", "Orange"],
     "YG": ["Wesleyan Methodist", "Randwick"]}
 
+# NSW District Codes (List supplied to Ree by Megan)
+nsw_district_codes = {
+    "001": "Sydney",
+    "002": "Kogarah",
+    "003": "Parramatta",
+    "004": "Bankstown",
+    "005": "Burwood",
+    "006": "Blacktown",
+    "007": "Camden",
+    "008": "Campbelltown",
+    "009": "Hornsby",
+    "010": "Liverpool",
+    "011": "Lord Howe Island",
+    "012": "Penrith",
+    "013": "Windsor",
+    "014": "Campsie",
+    "016": "Albury",
+    "017": "Ardlethan",
+    "018": "Balranald",
+    "019": "Boorowa",
+    "020": "Coolamon",
+    "021": "Cootamundra",
+    "022": "Corowa",
+    "023": "Culcairn",
+    "024": "Deniliquin",
+    "025": "Grenfell",
+    "026": "Griffith",
+    "027": "Gundagai",
+    "028": "Gunning",
+    "029": "Hay",
+    "030": "Henty",
+    "031": "Hillston",
+    "032": "Holbrook",
+    "033": "Jerilderie",
+    "034": "Junee",
+    "035": "Lake Cargillo",
+    "036": "Leeton",
+    "037": "Lockhart",
+    "038": "Murrumburrah",
+    "039": "Narrandera",
+    "040": "Temora",
+    "041": "Tocumwal",
+    "042": "Tumbarumba",
+    "043": "Tumut",
+    "044": "Urana",
+    "045": "Wagga Wagga",
+    "046": "West Wyalong",
+    "047": "Yass",
+    "048": "Young",
+    "049": "Finley",
+    "051": "Fairfield",
+    "052": "Lidcombe",
+    "053": "Ryde",
+    "054": "Sutherland",
+    "060": "Bathurst",
+    "061": "Blayney",
+    "062": "Bourke",
+    "063": "Brewarrina",
+    "064": "Broken Hill",
+    "065": "Canowindra",
+    "066": "Cobar",
+    "067": "Condoblin",
+    "068": "Coolah",
+    "069": "Coonabarabran",
+    "070": "Coonamble",
+    "071": "Cowra",
+    "072": "Dubbo",
+    "073": "Dunedoo",
+    "074": "Forbes",
+    "075": "Gilgandra",
+    "076": "Gulgong",
+    "077": "Katoomba",
+    "078": "Lithgow",
+    "079": "Menindee",
+    "080": "Molong",
+    "081": "Mudgee",
+    "082": "Narromine",
+    "083": "Nyngan",
+    "084": "Oberon",
+    "085": "Orange",
+    "086": "Parkes",
+    "087": "Peak Hill",
+    "088": "Portland",
+    "089": "Rylstone",
+    "090": "Tibooburra",
+    "091": "Warren",
+    "092": "Wellington",
+    "093": "Wentworth",
+    "094": "Wilcannia",
+    "101": "Newcastle",
+    "102": "Armidale",
+    "103": "Ballina",
+    "104": "Barraba",
+    "105": "Bellingen",
+    "106": "Bingara",
+    "107": "Bundarra",
+    "108": "Byron Bay",
+    "109": "Casino",
+    "110": "Cessnock",
+    "111": "Coffs Harbour",
+    "112": "Collarenebri",
+    "113": "Dungog",
+    "114": "East Maitland",
+    "115": "Emmaville",
+    "116": "Glen Innes",
+    "117": "Gloucester",
+    "118": "Goodooga",
+    "119": "Gosford",
+    "120": "Grafton",
+    "121": "Gunnedah",
+    "122": "Guyra",
+    "123": "Inverell",
+    "124": "Kempsey",
+    "125": "Kurri Kurri",
+    "126": "Kyogle",
+    "127": "Lismore",
+    "128": "Macksville",
+    "129": "Maclean",
+    "130": "Maitland",
+    "131": "Manilla",
+    "132": "Merriwa",
+    "133": "Moree",
+    "134": "Murrurundi",
+    "135": "Murwillumbah",
+    "136": "Muswellbrook",
+    "137": "Narrabri",
+    "138": "Port Macquarie",
+    "139": "Quirindi",
+    "140": "Raymond Terrace",
+    "141": "Scone",
+    "142": "Singleton",
+    "143": "Tamworth",
+    "144": "Taree",
+    "145": "Tenterfield",
+    "146": "Tingha",
+    "147": "Tweed Heads",
+    "148": "Uralla",
+    "149": "Walcha",
+    "150": "Walgett",
+    "151": "Warialda",
+    "152": "Wauchope",
+    "153": "Wee Waa",
+    "154": "Wingham",
+    "155": "Wyong",
+    "201": "Wollongong",
+    "202": "Bega",
+    "203": "Bombala",
+    "204": "Bowral",
+    "205": "Braidwood",
+    "206": "Cooma",
+    "207": "Crookwell",
+    "208": "Delegate",
+    "209": "Eden",
+    "210": "Goulburn",
+    "211": "Kiama",
+    "212": "Moruya",
+    "213": "Moss Vale",
+    "214": "Nowra",
+    "215": "Picton",
+    "216": "Queanbeyan"
+    }
+
 # Element type constants for the HTML parser
 START_TAG = 1
 END_TAG = 2
@@ -592,13 +754,21 @@ def output_var(state_ref, state_url, value_dict, var_list):
         var_value = value_dict[var_key]
     else:
         var_value = "** Format error - invalid key: " + var_key + " **"
-    if var_value != "":        
+    if var_value != "":
+        var_value_prefix = ""
+        if var_key == "district" and len(var_value) > 3:
+            # Exclude the two character church codes from case changes
+            if var_value[2] == " ":
+                var_value_prefix = var_value[0:3]
+                var_value = var_value[3:]
         if var_style == "C":
             var_value = var_value.title()
         elif var_style == "U":
             var_value = var_value.upper()
         elif var_style == "L":
             var_value = var_value.lower()
+        if var_value_prefix != "":
+            var_value = var_value_prefix + var_value
         return var_list[0] + var_value + var_list[2]
     else:
         return ""
@@ -818,11 +988,14 @@ def parse_nsw_html(clip):
     d = value_dict["district"]
     if d.isnumeric():
         # we have one of the numeric district codes - somewhere in NSW
-        loc = ""
+        loc = nsw_district_codes.get(d, "")
+        if loc != "":
+            value_dict["district"] = d + " (" + loc + ")"
     elif len(d) == 2:
         if d in church_codes:
             # church record code
             loc = church_codes[d][1]
+            value_dict["district"] = d + " (" + loc + ")"
             if len(church_codes[d]) > 2:
                 value_dict["state"] = church_codes[d][2]
         else:
