@@ -143,6 +143,9 @@ If you create a format file you particularly like and would like to share, by al
 
 ## Version History
 
+### Version 3.2
+* Rewrite NSW parser to work with the new website layout.
+
 ### Version 3.1
 * Add table of NSW numerical district codes
 * Output church and numeric codes with the translated value appended in parentheses e.g. 001 (Sydney)

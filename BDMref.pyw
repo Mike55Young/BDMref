@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 __author__ = "Mike Young"
-__Version__ = "3.1"
+__Version__ = "3.2"
 
 #
 import tkinter as tk
@@ -35,7 +35,7 @@ qld_url = "https://www.familyhistory.bdm.qld.gov.au/"
 sa_ref = "Genealogy South Australia - Online Database Search"
 sa_url = "https://www.genealogysa.org.au/resources/online-database-search"
 vic_ref = "Births Deaths and Marriages Victoria - Family History Search"
-vic_url = "https://www.bdm.vic.gov.au/research-and-family-history/search-your-family-history"
+vic_url = "https://my.rio.bdm.vic.gov.au/efamily-history/-"
 wa_ref = "Western Australia Department of Justice - Online Index Search"
 wa_url = "https://www.wa.gov.au/organisation/department-of-justice/online-index-search-tool"
 nz_ref = "New Zealand Government, Internal Affairs - Births, Deaths & Marriages Online"
@@ -933,57 +933,109 @@ def get_first(names):
     else:
         return names
 
+def strip_span(details):
+    # return all the data from the first <span> to the last </span> removing the tags and converting &nbsp; to a simple space
+    # ignore text before the first <span> and after the final </span>
+    # initial span may have a parameter
+    i1 = details.find("<span")
+    i1 = details.find(">", i1) + 1
+    j1 = details.rfind("</span>")
+    result = details[i1:j1]
+    result = result.replace("<span>", "")
+    result = result.replace("</span>", "")
+    result = result.replace("&nbsp;", " ")
+    result = result.replace("\\xc2\\xa0", " ")
+    return result  
+
 def parse_nsw_html(clip):
     item_num = ""
     item_year = ""
     item_ref = ""
     value_dict = init_value_dict("New South Wales")
+    clip_type = "marriage"
     
-    # find the strings starting with <span wicketpath...> and ending in </span>
-    i, tag_prefix, tag_suffix = get_tag(clip, "span wicketpath=", 0)
+    i = clip.find('<div class="col-md', 0)
     if i == -1:
         output_error("Not a valid NSW clip")
         value_dict["event"] = "Error"
         return value_dict
-    while i >= 0:
-        tag_name = get_key(tag_suffix)
+
+    j = clip.find("col-md-4")
+    if j > 0:
+        clip_type = "birth/death"
+        # birth and death records report the names as <span class="ds-firstname"><span>...</span></span> and <span class="ds-lastname"><span>...</span></span>
+        # the class values ds-firstname appears to be applied to the family name
+        i = clip.find('<span class="ds-firstname"', j)
+        if i == -1:
+            output_error("Field missing - firstname")
+            value_dict["event"] = "Error"
+            return value_dict
+        i = clip.find("<span>", i) + 6
         j = clip.find("</span>", i)
-        tag_value = clip[i:j].replace("\\'", "'")
-        # set a variable based on the returned name/value pair
-        if tag_name == "subjectFamilyName":
-            value_dict["family name"] = tag_value
-        elif tag_name == "subjectGivenName":
-            value_dict["given name"] = tag_value
-            value_dict["first name"] = get_first(tag_value)
-        elif tag_name == "itemNum":
-            item_num = tag_value
-        elif tag_name == "itemYear":
-            item_year = tag_value
-            value_dict["year text"] = tag_value
-        elif tag_name == "indexRef":
-            item_ref = tag_value
-        elif tag_name == "fatherName":
-            value_dict["father"] = tag_value
-        elif tag_name == "motherName":
-            value_dict["mother"] = tag_value
-        elif tag_name == "district":
-            value_dict["district"] = tag_value
-        elif tag_name == "groomFamilyName":
-            value_dict["groom family"] = tag_value
-        elif tag_name == "groomGivenName":
-            value_dict["groom given"] = tag_value
-        elif tag_name == "brideFamilyName":
-            value_dict["bride family"] = tag_value
-        elif tag_name == "brideGivenName":
-            value_dict["bride given"] = tag_value
+        value_dict["family name"] = clip[i:j].replace("\\'", "'")
+
+        # the class values ds-lastname appears to be applied to the given name(s)
+        i = clip.find('<span class="ds-lastname"', i)
+        if i == -1:
+            output_error("Field missing - lastname")
+            value_dict["event"] = "Error"
+            return value_dict
+        i = clip.find("<span>", i) + 6
+        j = clip.find("</span>", i)
+        given_names = clip[i:j].replace("\\'", "'")
+        value_dict["given name"] = given_names
+        s = given_names.find(" ")
+        if s == -1:
+            value_dict["first name"] = given_names
         else:
-            # just in case there is a field not previously used...
-            print(tag_name + "=" + tag_value)
-        i, tag_prefix, tag_suffix = get_tag(clip, "span wicketpath=", j)
-    if item_ref != "":
-        value_dict["reg no"] = item_num + "/" + item_year + " " + item_ref
-    else:
-        value_dict["reg no"] = item_num + "/" + item_year
+            value_dict["first name"] = given_names[:s]
+    
+    # the remaining data is laid out as <div class="col-md-2"><span>data</span> and additional <span>data</span> if needed
+    i = clip.find("col-md-2", i)
+    fld_num = 1
+    while i >= 0:
+        # print(clip[i:])
+        i = clip.find(">", i)
+        if i == -1:
+            print("'>' not found")
+            return value_dict
+
+        i += 1
+        j = clip.find("</div>", i)
+        
+        tag_value = strip_span(clip[i:j].replace("\\'", "'"))
+        # set a variable based on the returned name/value pair
+        if fld_num == 1:
+            value_dict["reg no"] = tag_value
+            y = tag_value.find("/") + 1
+            value_dict["year text"] = tag_value[y:y+4]
+        else:
+            if clip_type == "marriage":
+                if fld_num == 2:
+                    value_dict["groom family"] = tag_value
+                elif fld_num == 3:
+                    value_dict["groom given"] = tag_value
+                elif fld_num == 4:
+                    value_dict["bride family"] = tag_value
+                elif fld_num == 5:
+                    value_dict["bride given"] = tag_value
+                elif fld_num == 6:
+                    value_dict["district"] = tag_value
+                else:
+                    # just in case there is a field not previously used...
+                    print(str(fld_num) + " " + tag_value)
+            else:
+                if fld_num == 2:
+                    value_dict["father"] = tag_value
+                elif fld_num == 3:
+                    value_dict["mother"] = tag_value
+                elif fld_num == 4:
+                    value_dict["district"] = tag_value
+                else:
+                    # just in case there is a field not previously used...
+                    print(str(fld_num) + " " + tag_value)
+        i = clip.find("col-md-2", j)
+        fld_num += 1
     # extract a location string from the various possible district values if possible
     d = value_dict["district"]
     if d.isnumeric():
